@@ -1,0 +1,253 @@
+#Options
+GenerateScanner = true
+GenerateParser = true
+Language = C++
+ScannerName = Lexico
+ParserName = Sintatico
+SemanticName = Semantico
+ScannerCaseSensitive = true
+ScannerTable = Full
+Input = String
+Parser = SLR
+#RegularDefinitions
+LETTER: [A-Za-z]
+UNDERSCORE: [_]
+INTEGER_KEY: int
+NUMBER: [0-9]
+CHARACTER: [^\"]
+OTHERS:[\ \n\r\t]
+BAR : "/"
+COMMENTS: ({BAR}{BAR}[^\n\r]*)
+MULTILINE_COMMENT: /\*([^\*]|[\r\n]|(\*+([^\*/]|[\r\n])))*\*+/
+#Tokens
+BOOLEAN_VALUE: (true|false)
+
+ID: {LETTER} ( {LETTER} | {NUMBER} | {UNDERSCORE} )*
+
+
+/// PALAVRAS RESERVADAS
+USING = ID : "using"
+CONST = ID : "const"
+BREAK = ID : "break"
+RETURN = ID : "return"
+COUT = ID : "cout"
+CIN = ID : "cin"
+DEFAULT = ID : "default"
+CONTINUE = ID : "continue"
+PRINTF = ID : "print"
+SCANF = ID : "scanf"
+FUNCTION = ID : "function"
+
+/// IMPORTS
+IMPORT = ID : "import"
+// Types
+INT = ID : "int"
+FLOAT = ID : "float"
+CHAR = ID: "char"
+STRING = ID : "string"
+BOOL= ID : "bool"
+DOUBLE = ID : "double"
+
+// Functions
+VOID = ID : "void"
+MAIN = ID: "main"
+
+// Conditionals
+IF = ID : "if"
+ELSE = ID : "else"
+SWITCH = ID : "switch"
+CASE = ID : "case"
+
+
+// Looping
+FOR = ID : "for"
+WHILE = ID : "while"
+DO = ID : "do"
+
+// Comparision
+OR : "||"
+AND : "&&"
+MAIOR : ">"
+MENOR : "<" 
+MENOR_IGUAL: "<="
+MAIOR_IGUAL : ">="
+
+/// Operators
+MAIS : "+"
+MENOS : "-"
+DIVISAO : "/"
+MOD : "%"
+MULTIPLICACAO : "*"
+ATRIBUICAO : "="
+IGUAL : "=="
+INVERTER : "!"
+DIFERENTE : "!=" | "<>"
+
+// BITWISE OPERATORS
+
+RIGHTSHIFT: ">>"
+LEFTSHIFT : "<<"
+BITWISE_AND : "&"
+BITWISE_OR : "|"
+BITWISE_NOT : "~"
+BITWISE_XOR : "^"
+
+// DELIMITADORES
+
+PONTO: "."
+VIRGULA: ","
+DOIS_PONTOS: ":"
+PONTO_E_VIRGULA: ";"
+ABRIR_COLCHETES : "["
+FECHAR_COLCHETES : "]"
+ABRIR_PARENTESES: "(" 
+FECHAR_PARENTESES: ")"
+ABRIR_CHAVES: "{"
+FECHAR_CHAVES: "}"
+CONTRABARRA: "\"
+INTERROGACAO: "?"
+
+
+// VALUES
+
+
+INT_VALUE: {NUMBER}+
+FLOAT_VALUE : {NUMBER}+ \. {NUMBER}+f
+DOUBLE_VALUE : {NUMBER}+ \. {NUMBER}+
+BIN_VALUE : 0b[01]+
+HEX_VALUE : 0x[0-9A-Fa-f]+
+STRING_VALUE : \"( [^\"]  ) *\"
+CHAR_VALUE: '( {LETTER} | {NUMBER} | {UNDERSCORE} | {OTHERS} | {CHARACTER} ) '
+
+:{OTHERS}*
+
+: {COMMENTS}
+: {MULTILINE_COMMENT}
+#NonTerminals
+<prog>
+<main>
+<cmd>
+<declarar_var>
+<declarar_function>
+<lacos_repeticao>
+<declarar_desvio>
+<declarar_vetor>
+<tipo>
+<atribuicao_variavel>
+<atribuicao>
+<expressao_aritmetica>
+<termo>
+<lista_termo>
+<operador_aritmetico>
+<lista_ids>
+<declarar_vetor_multi>
+<vetor>
+<escopo>
+<laco_while>
+<laco_do_while>
+<laco_for>
+<condicao_for>
+<mais_menos_um>
+<sub_um>
+<soma_um>
+<if>
+<if_else>
+<in_out>
+<cin>
+<cin_mult>
+<cout>
+<cout_multi>
+<parametros>
+<return>
+<chamar_function>
+<logicos>
+<ponteiro>
+<printf>
+<scanf>
+<exp>
+<exp0>
+<exp1>
+<exp2>
+<exp3>
+<exp4>
+<exp5>
+<exp6>
+<exp7>
+<exp8>
+<exp9>
+<exp10>
+<op_rel>
+<op_neg>
+<op_bitwise>
+<op_arit_baixa>
+<op_arit_alta>
+<op_arit_mais_alta>
+#Grammar
+<prog> ::= INT MAIN ABRIR_PARENTESES FECHAR_PARENTESES ABRIR_CHAVES #18 <main> FECHAR_CHAVES #19 | <declarar_function>#20<escopo><prog> | <declarar_var><prog>;
+<main> ::= <main><cmd> | <cmd> |<main> <return> | <return>;
+<cmd>::= <declarar_var> |<atribuicao_variavel> PONTO_E_VIRGULA |<declarar_function>#20<escopo> | <lacos_repeticao> | <declarar_desvio> | <escopo> | <in_out> | <chamar_function>#33 PONTO_E_VIRGULA;
+
+<lista_ids>::= <lista_ids> VIRGULA ID #2 | ID #2 ;
+<declarar_var>::= <tipo> <lista_ids>  PONTO_E_VIRGULA | <tipo> <lista_ids> ATRIBUICAO <exp>  #10 PONTO_E_VIRGULA| <ponteiro> PONTO_E_VIRGULA |<declarar_vetor>  PONTO_E_VIRGULA |<declarar_vetor> VIRGULA <lista_ids> PONTO_E_VIRGULA|<declarar_vetor> VIRGULA <declarar_vetor_multi> PONTO_E_VIRGULA ;
+<tipo>::= BOOL #1 | INT #1 | CHAR #1 | STRING #1 | FLOAT #1 | DOUBLE #1;
+<atribuicao_variavel> ::=  ID #4 ATRIBUICAO <chamar_function> #5 |  ID #4 ATRIBUICAO <exp> #5 | <mais_menos_um> | <vetor>#4 ATRIBUICAO<exp> #5 | <atribuicao> | <vetor>#4 ATRIBUICAO <chamar_function> #5;
+<ponteiro>::=  <tipo> MULTIPLICACAO <lista_ids>;
+
+<mais_menos_um>::= <sub_um> | <soma_um>;
+<sub_um>::= ID#4 MENOS MENOS;
+<soma_um>::= ID#4 MAIS MAIS;
+
+<atribuicao>::= ID#4 <op_arit_baixa> ATRIBUICAO <exp> | ID <op_arit_alta> ATRIBUICAO<exp> ;
+
+//<exp>  ::= <exp> ATRIBUICAO <exp0> | <exp0>;
+<exp> ::= <exp> OR#28 <exp1> | <exp1>;
+<exp1> ::= <exp1> AND#29 <exp2> | <exp2>;
+<exp2> ::= <exp2> BITWISE_OR#30 <exp3> | <exp3>;
+<exp3> ::= <exp3> BITWISE_XOR#31 <exp4> | <exp4>;
+<exp4> ::= <exp4> BITWISE_AND#32 <exp5> | <exp5>;
+<exp5> ::= <exp5> <op_rel> <exp6> | <exp6>;
+<exp6> ::= <exp6> <op_bitwise> <exp7> | <exp7>;
+<exp7> ::= <exp7> <op_arit_baixa> <exp8> | <exp8>;
+<exp8> ::= <exp8> <op_arit_alta> <exp9> | <exp9> ;
+<exp9> ::= <op_neg> <exp10>#12 | <exp10> #12;
+<exp10> ::= <termo> | ABRIR_PARENTESES <exp> FECHAR_PARENTESES;
+
+<termo> ::= ID#3 | INT #8 | DOUBLE_VALUE #49 | CHAR_VALUE#6 | STRING_VALUE#7 | FLOAT_VALUE #9 | BOOLEAN_VALUE #11 | <vetor>#3;
+<lista_termo>::= <termo>#12 | <lista_termo> VIRGULA <termo>;
+
+<op_rel> ::= MAIOR#22 |MENOR#23 |MENOR_IGUAL#24 | MAIOR_IGUAL#25 |IGUAL#26 | DIFERENTE#27; 
+<op_neg> ::= BITWISE_NOT | INVERTER;
+<op_bitwise> ::= RIGHTSHIFT | LEFTSHIFT;
+<op_arit_baixa> ::= MAIS #13 |MENOS #14 ;
+<op_arit_alta> ::= MULTIPLICACAO #15 | DIVISAO #16 | MOD #17;
+
+<declarar_vetor>::= <tipo> <lista_ids> ABRIR_COLCHETES INT#34 FECHAR_COLCHETES#21;
+<declarar_vetor_multi>::=  <lista_ids> ABRIR_COLCHETES INT#34 FECHAR_COLCHETES#21 |<lista_ids> ABRIR_COLCHETES INT#34 FECHAR_COLCHETES#21 <declarar_vetor_multi> ;
+<vetor>::= ID ABRIR_COLCHETES <exp>#35 FECHAR_COLCHETES ;
+
+<escopo>::= ABRIR_CHAVES #18 <main> FECHAR_CHAVES;
+<lacos_repeticao>::= <laco_while> | <laco_do_while> | <laco_for>;
+<laco_while>::= WHILE ABRIR_PARENTESES <exp> FECHAR_PARENTESES <escopo>;
+<laco_do_while>::= DO  <escopo> WHILE ABRIR_PARENTESES <exp> FECHAR_PARENTESES PONTO_E_VIRGULA;
+<laco_for>::= FOR ABRIR_PARENTESES <condicao_for> FECHAR_PARENTESES <escopo>;
+
+<condicao_for>::= <declarar_var> <exp> PONTO_E_VIRGULA <atribuicao_variavel>|<atribuicao_variavel> PONTO_E_VIRGULA <exp> PONTO_E_VIRGULA <atribuicao_variavel>;
+
+
+<declarar_desvio>::= <if> | <if_else>;
+<if>::= IF ABRIR_PARENTESES <exp> FECHAR_PARENTESES <escopo>;
+<if_else>::= <if> ELSE <escopo>| <if> ELSE<declarar_desvio>;
+
+<in_out>::= <cin>  PONTO_E_VIRGULA | <cout> PONTO_E_VIRGULA | <printf> | <scanf>;
+<cin>::= CIN RIGHTSHIFT <vetor>#4 |CIN RIGHTSHIFT ID#4 | CIN RIGHTSHIFT <vetor>#4 <cin_mult> | CIN RIGHTSHIFT ID#4 <cin_mult>  ;
+<cin_mult>::= RIGHTSHIFT <vetor>#4 | RIGHTSHIFT <vetor>#4 <cin_mult> | RIGHTSHIFT ID#4 | RIGHTSHIFT ID#4 <cin_mult>;
+<cout>::= COUT LEFTSHIFT <termo> |  COUT LEFTSHIFT <termo> <cout_multi> ;
+<cout_multi>::=  LEFTSHIFT <termo>|  LEFTSHIFT <termo> <cout_multi>;
+<printf>::=PRINTF  ABRIR_PARENTESES <lista_termo> FECHAR_PARENTESES PONTO_E_VIRGULA;
+<scanf>::= SCANF ABRIR_PARENTESES<lista_termo> FECHAR_PARENTESES PONTO_E_VIRGULA;
+
+<declarar_function>::= <tipo> ID#2 ABRIR_PARENTESES FECHAR_PARENTESES | VOID#1 ID#2 ABRIR_PARENTESES FECHAR_PARENTESES #20;
+<declarar_function>::= <tipo> ID#2 ABRIR_PARENTESES <parametros> FECHAR_PARENTESES | VOID#1 ID#2 ABRIR_PARENTESES <parametros> FECHAR_PARENTESES;
+<parametros>::= <tipo> ID | <tipo> ID VIRGULA <parametros> |  <tipo> <vetor> | <ponteiro>;
+<return>::= RETURN <exp> PONTO_E_VIRGULA | RETURN PONTO_E_VIRGULA;
+<chamar_function>::= ID ABRIR_PARENTESES FECHAR_PARENTESES | ID ABRIR_PARENTESES <lista_termo> FECHAR_PARENTESES;
