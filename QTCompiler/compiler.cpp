@@ -1,5 +1,6 @@
 #include "compiler.h"
 #include "ui_compiler.h"
+#include "frmtabela.h"
 
 #include <iostream>
 #include <fstream>
@@ -18,6 +19,7 @@ Compiler::Compiler(QWidget *parent)
     , ui(new Ui::Compiler)
 {
     ui->setupUi(this);
+    this->sem = NULL;
 }
 
 Compiler::~Compiler()
@@ -34,9 +36,13 @@ void Compiler::on_btnCompile_clicked()
     const char * code = teste.c_str();
     Lexico* lex = new Lexico();
     Sintatico* sint = new Sintatico();
-    Semantico* sem = new Semantico();
 
     lex->setInput(code);
+
+    if(sem) {
+        delete sem;
+    }
+    this->sem = new Semantico();
 
     try
     {
@@ -103,3 +109,14 @@ void Compiler::on_btnLoad_clicked()
 
     file.close();
 }
+
+void Compiler::on_btnTabela_clicked()
+{
+    if(this->sem == nullptr)
+        return;
+    if(this->sem->tabelaSimbolo.empty())
+        return;
+    frmTabela * tabela = new frmTabela(this->sem->tabelaSimbolo, this);
+    tabela->show();
+}
+

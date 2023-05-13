@@ -13,14 +13,9 @@ SOURCES += \
     Lexico.cpp \
     Semantico.cpp \
     Sintatico.cpp \
+    frmtabela.cpp \
     main.cpp \
-    compiler.cpp \
-    compiler.cpp \
-    Constants.cpp \
-    Lexico.cpp \
-    main.cpp \
-    Semantico.cpp \
-    Sintatico.cpp
+    compiler.cpp
 
 HEADERS += \
     AnalysisError.h \
@@ -33,21 +28,11 @@ HEADERS += \
     SyntaticError.h \
     Token.h \
     compiler.h \
-    semantictable.h \
-    AnalysisError.h \
-    compiler.h \
-    Constants.h \
-    LexicalError.h \
-    Lexico.h \
-    SemanticError.h \
-    Semantico.h \
-    semantictable.h \
-    Sintatico.h \
-    SyntaticError.h \
-    Token.h
+    frmtabela.h
 
 FORMS += \
-    compiler.ui
+    compiler.ui \
+    frmtabela.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
