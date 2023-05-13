@@ -1,8 +1,12 @@
 #include "Lexico.h"
 
-void Lexico::setInput(const char *input)
+void Lexico::setInput(std::istream &input)
 {
-    this->input = input;
+    std::istreambuf_iterator<char> in(input);
+    std::istreambuf_iterator<char> eof;
+
+    this->input.assign(in, eof);
+
     setPosition(0);
 }
 
