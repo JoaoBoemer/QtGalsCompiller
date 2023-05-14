@@ -7,6 +7,7 @@
 
 using namespace std;
 
+Simbolo simbolo;
 stack<int> Escopo;
 int escopo = 0;
 
@@ -21,9 +22,9 @@ void ResetaTabela()
         Escopo.pop();
     }
     escopo = 0;
+    simbolo.vetor = false;
+    simbolo.parametro = false;
 }
-
-Simbolo simbolo;
 
 void Semantico::executeAction(int action, const Token *token) throw (SemanticError )
 {
@@ -32,7 +33,6 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
 
     string lexema = token->getLexeme();
     stack<int> temp;
-    simbolo.funcao = false;
     simbolo.vetor = false;
 
     if(Escopo.empty())
@@ -64,36 +64,34 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
             temp.pop();
         }
 
-
+        simbolo.funcao = false;
         simbolo.id = token->getLexeme();
         simbolo.escopo = Escopo.top();
+
+        if(simbolo.parametro)
+        {
+            simbolo.escopo = Escopo.top() + 1;
+        }
+
         tabelaSimbolo.push_front(simbolo);
+
+        simbolo.vetor =false;
         break;
 
     case 10:
         escopo++;
         Escopo.push(escopo);
-        cout << "\nValor novo escopo = " << escopo;
-        cout << "\nTamanho novo Escopo = " << Escopo.size();
-        cout << endl;
         break;
+
     case 11:
         Escopo.pop();
-        cout << "\nValor novo escopo = " << escopo;
-        cout << "\nTamanho novo Escopo = " << Escopo.size();
-        cout << endl;
         break;
+
     case 20:
-        for(Simbolo sim : tabelaSimbolo)
-        {
-            cout << "Escopo: " << sim.escopo << " Tipo: " << sim.tipo << " ID: " << sim.id << "Funcao? " << sim.funcao << endl;
-        }
-
-
-        /// Limpar tudo
         ResetaTabela();
         break;
-    case 39:
+
+    case 37:
         while(!temp.empty())
         {
             for(Simbolo sim : tabelaSimbolo)
@@ -113,9 +111,20 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
         }
 
         simbolo.funcao = true;
+        simbolo.parametro = false;
+        simbolo.vetor = false;
         simbolo.id = token->getLexeme();
         simbolo.escopo = Escopo.top();
         tabelaSimbolo.push_front(simbolo);
+        simbolo.parametro = true;
+        break;
+
+    case 39:
+        simbolo.parametro = false;
+        break;
+
+    case 43:
+        simbolo.vetor = true;
         break;
     }
 }
