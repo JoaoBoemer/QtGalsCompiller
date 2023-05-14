@@ -22,5 +22,11 @@ Abertura de escopo
 ### #11
 Fechar escopo
 
-### #39
+### #37
 Adiciona função na tabela
+### #39
+Finaliza entrada de parametros
+### #42
+Identifica função utilizada
+### #43
+Vetor passado por parametro
