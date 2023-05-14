@@ -20,14 +20,28 @@ frmTabela::frmTabela(list<Simbolo> tabSim, QWidget * parent) :
     string Mensagem = "";
 
     for(Simbolo sim : tabSim){
+        Mensagem.append("ID: ");
         Mensagem.append(sim.id);
-        Mensagem.append(" | ");
+        Mensagem.append("\nTipo: ");
         Mensagem.append(sim.tipo);
-        Mensagem.append(" | ");
+        Mensagem.append("\nEscopo: ");
         Mensagem.append(to_string(sim.escopo));
-        Mensagem.append("\n");
+        Mensagem.append("\nInicializado?: ");
+        Mensagem.append(to_string(sim.inicializado));
+        Mensagem.append("\nUsado?: ");
+        Mensagem.append(to_string(sim.usado));
+        Mensagem.append("\nFuncao? ");
+        Mensagem.append(to_string(sim.funcao));
+        Mensagem.append("\nParametro? ");
+        Mensagem.append(to_string(sim.parametro));
+        Mensagem.append("\nVetor? ");
+        Mensagem.append(to_string(sim.vetor));
+        Mensagem.append("\nPosicoesVetor? ");
+        Mensagem.append(to_string(sim.posVetor));
+
+        Mensagem.append("\n----------------------------\n");
     }
-    ui->textEdit->append("ID | TIPO | ESCOPO | FUNCAO | ");
+    //ui->textEdit->append("ID | TIPO | ESCOPO | FUNCAO | PARAMETRO | VETOR");
     ui->textEdit->append(Mensagem.c_str());
 }
 

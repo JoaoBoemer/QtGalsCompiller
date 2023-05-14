@@ -33,6 +33,7 @@ void Compiler::on_btnCompile_clicked()
 {
     QString text = ui->txtCode->toPlainText();
     string teste = text.toStdString();
+    string warning = "";
     const char * code = teste.c_str();
     Lexico* lex = new Lexico();
     Sintatico* sint = new Sintatico();
@@ -47,19 +48,60 @@ void Compiler::on_btnCompile_clicked()
     try
     {
         sint->parse(lex, sem);
-        ui->txtResult->setText("Compilou :D");
+
+        for(Warning war : this->sem->Tabela.lstWarning)
+        {
+            warning.append("Warning: ");
+            warning.append(war.error);
+            warning.append(" var: ");
+            warning.append(war.sim.id);
+            warning.append("\n");
+        }
+        ui->txtResult->setText(warning.c_str());
+
+        ui->txtResult->append("Compilou :D");
     }
     catch( LexicalError e )
     {
-        ui->txtResult->setText(e.getMessage());
+        for(Warning war : this->sem->Tabela.lstWarning)
+        {
+            warning.append("Warning: ");
+            warning.append(war.error);
+            warning.append(" var: ");
+            warning.append(war.sim.id);
+            warning.append("\n");
+        }
+        ui->txtResult->setText(warning.c_str());
+
+        ui->txtResult->append(e.getMessage());
     }
     catch ( SyntaticError e )
     {
-        ui->txtResult->setText(e.getMessage());
+        for(Warning war : this->sem->Tabela.lstWarning)
+        {
+            warning.append("Warning: ");
+            warning.append(war.error);
+            warning.append(" var: ");
+            warning.append(war.sim.id);
+            warning.append("\n");
+        }
+        ui->txtResult->setText(warning.c_str());
+
+        ui->txtResult->append(e.getMessage());
     }
     catch ( SemanticError e )
     {
-        ui->txtResult->setText(e.getMessage());
+        for(Warning war : this->sem->Tabela.lstWarning)
+        {
+            warning.append("Warning: ");
+            warning.append(war.error);
+            warning.append(" var: ");
+            warning.append(war.sim.id);
+            warning.append("\n");
+        }
+        ui->txtResult->setText(warning.c_str());
+
+        ui->txtResult->append(e.getMessage());
     }
 
 }
@@ -106,7 +148,6 @@ void Compiler::on_btnLoad_clicked()
 
     text = QString::fromStdString(content);
     ui->txtCode->setText(text);
-
     file.close();
 }
 
@@ -114,9 +155,9 @@ void Compiler::on_btnTabela_clicked()
 {
     if(this->sem == nullptr)
         return;
-    if(this->sem->tabelaSimbolo.empty())
+    if(this->sem->Tabela.lstSimbolos.empty())
         return;
-    frmTabela * tabela = new frmTabela(this->sem->tabelaSimbolo, this);
+    frmTabela * tabela = new frmTabela(this->sem->Tabela.lstSimbolos, this);
     tabela->show();
 }
 
