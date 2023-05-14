@@ -7,10 +7,10 @@ Tipo
 Verifica ID e adiciona na tabela
 
 ### #3
-Verifica usuado
+Marca utilização de variável e dispara warning se não foi inicializada anteriormente
 
 ### #4
-Utilização de variável
+Marca a initicalização da variável
 
 ### #5
 Depois atribuir
@@ -24,9 +24,13 @@ Fechar escopo
 
 ### #37
 Adiciona função na tabela
+### #38
+Vetor passado por parametro
 ### #39
 Finaliza entrada de parametros
+### #41 
+Tamanho inteiro do vetor
 ### #42
-Identifica função utilizada
+Fecha vetor
 ### #43
-Vetor passado por parametro
+Identifica função utilizada
