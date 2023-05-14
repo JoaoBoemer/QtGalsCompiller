@@ -13,24 +13,27 @@ Marca utilização de variável e dispara warning se não foi inicializada anter
 Marca a initicalização da variável
 
 ### #5
-Depois atribuir
+Adiciona Warning caso variável não tenha sido inicializada
 
 ### #6
+Inicializa variáveis que foram declaradas com valor;
+
+### #7
+Adiciona função na tabela
+
+### #8
+Finaliza entrada de parametros
+
+### #9
+Indica que a variável é um vetor
 
 ### #10
 Abertura de escopo
 ### #11
 Fechar escopo
 
-### #37
-Adiciona função na tabela
-### #38
-Vetor passado por parametro
-### #39
-Finaliza entrada de parametros
-### #41 
-Tamanho inteiro do vetor
-### #42
-Fecha vetor
-### #43
-Identifica função utilizada
+### #12
+Passa o tamanho do vetor para a lista de simbolos
+
+### #13
+Verifica se a função existe no escopo e determina como usada.
