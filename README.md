@@ -37,3 +37,36 @@ Passa o tamanho do vetor para a lista de simbolos
 
 ### #13
 Verifica se a função existe no escopo e determina como usada.
+
+### #14
+Verifica se a saída é válida
+
+### #15
+Aleatorio
+
+### #17
+Verifica se a chamada de função retorna o mesmo tipo e inicializa a variável
+
+### #19 
+Limpa os valores da expressão
+
+### #20
+Encerra o programa
+
+### #30
+Aleatorio
+
+# Valores
+
+### #31
+Int
+### #32
+Float
+### #33
+Dobule
+### #34
+Char
+### #35
+String
+### #36
+Bool
