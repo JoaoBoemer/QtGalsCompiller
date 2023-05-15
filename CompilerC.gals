@@ -34,7 +34,7 @@ COUT = ID : "cout"
 CIN = ID : "cin"
 DEFAULT = ID : "default"
 CONTINUE = ID : "continue"
-PRINTF = ID : "print"
+PRINTF = ID : "printf"
 SCANF = ID : "scanf"
 FUNCTION = ID : "function"
 
@@ -188,24 +188,26 @@ CHAR_VALUE: '( {LETTER} | {NUMBER} | {UNDERSCORE} | {OTHERS} | {CHARACTER} ) '
 <ponteiros>
 <vetor_parametro>
 <atribuir_multi>
+<saidas>
+<vetor_exp>
 #Grammar
 <prog> ::= INT MAIN ABRIR_PARENTESES FECHAR_PARENTESES ABRIR_CHAVES #10 <lista_cmd> #20 FECHAR_CHAVES | <declarar_function> <escopo><prog> | <declarar_var><prog>;
 
-<lista_cmd> ::= <lista_cmd> <cmd> | <cmd> | <return>;
+<lista_cmd> ::= <lista_cmd> <cmd> | <cmd>; //<return>;
 
-<cmd>::= <declarar_var> |<atribuicao_variavel> PONTO_E_VIRGULA |<declarar_function> <escopo> | <lacos_repeticao> | <declarar_desvio> | <escopo> | <in_out> | <chamar_function> #33 PONTO_E_VIRGULA;
+<cmd>::= <declarar_var> |<atribuicao_variavel> PONTO_E_VIRGULA |<declarar_function> <escopo> | <lacos_repeticao> | <declarar_desvio> | <escopo> | <in_out> | <chamar_function> #33 PONTO_E_VIRGULA | <return>;
 
 <lista_ids>::= <lista_ids> VIRGULA ID #2 | ID #2;
 
-<atribuir_multi> ::= VIRGULA <lista_ids> ATRIBUICAO #6 <exp> PONTO_E_VIRGULA | VIRGULA <lista_ids> ATRIBUICAO #6 <exp> <atribuir_multi> PONTO_E_VIRGULA | VIRGULA <lista_ids> PONTO_E_VIRGULA;
+<atribuir_multi> ::= VIRGULA <lista_ids> ATRIBUICAO <exp> #6 | VIRGULA <lista_ids> ATRIBUICAO <exp> #6 <atribuir_multi> | VIRGULA <lista_ids>;
 
-<declarar_var>::= <tipo> <lista_ids> PONTO_E_VIRGULA | <tipo> <lista_ids> ATRIBUICAO #6 <exp> PONTO_E_VIRGULA | <tipo> <lista_ids> ATRIBUICAO #6 <exp> <atribuir_multi>
+<declarar_var>::= <tipo> <lista_ids> PONTO_E_VIRGULA | <tipo> <lista_ids> ATRIBUICAO <exp> #6 PONTO_E_VIRGULA | <tipo> <lista_ids> ATRIBUICAO <exp> #6 <atribuir_multi> PONTO_E_VIRGULA
 		| <ponteiros> PONTO_E_VIRGULA |<declarar_vetor>  PONTO_E_VIRGULA
 	         |<declarar_vetor> VIRGULA <lista_ids> PONTO_E_VIRGULA | <declarar_vetor> VIRGULA <declarar_vetor_multi> PONTO_E_VIRGULA;// | <tipo> ID #2 ATRIBUICAO <chamar_function> PONTO_E_VIRGULA;
 
 <tipo>::= BOOL #1 | INT #1 | CHAR #1 | STRING #1 | FLOAT #1 | DOUBLE #1;
 
-<atribuicao_variavel> ::=  ID #4 ATRIBUICAO <chamar_function> | ID #4 ATRIBUICAO <exp> | <mais_menos_um> | <vetor> ATRIBUICAO <exp> | <atribuicao> | <vetor> ATRIBUICAO <chamar_function>;
+<atribuicao_variavel> ::=  ID #4 ATRIBUICAO <chamar_function> #17 | ID #4 ATRIBUICAO <exp> #16 | <mais_menos_um> | <vetor> ATRIBUICAO <exp> #16 | <atribuicao> | <vetor> ATRIBUICAO <chamar_function> #17;
 
 <ponteiros>::=  <tipo> MULTIPLICACAO <lista_ids>;
 <ponteiro> ::= <tipo> MULTIPLICACAO ID;
@@ -226,11 +228,14 @@ CHAR_VALUE: '( {LETTER} | {NUMBER} | {UNDERSCORE} | {OTHERS} | {CHARACTER} ) '
 <exp6> ::= <exp6> <op_bitwise> <exp7> | <exp7>;
 <exp7> ::= <exp7> <op_arit_baixa> <exp8> | <exp8>;
 <exp8> ::= <exp8> <op_arit_alta> <exp9> | <exp9> ;
-<exp9> ::= <op_neg> <exp10>#12 | <exp10> #12;
+<exp9> ::= <op_neg> <exp10>#15 | <exp10> #15;
 <exp10> ::= <termo> | ABRIR_PARENTESES <exp> FECHAR_PARENTESES;
 
-<termo> ::= ID #3 | INT_VALUE #31 | FLOAT_VALUE #32 | DOUBLE_VALUE #33 | CHAR_VALUE#34 | STRING_VALUE#35 | BOOLEAN_VALUE #36 | <vetor> #3;// | <chamar_function>;
-<lista_termo>::= <termo>#12 | <lista_termo> VIRGULA <termo>;
+<termo> ::= ID #3 | INT_VALUE #31 | FLOAT_VALUE #32 | DOUBLE_VALUE #33 | CHAR_VALUE#34 | STRING_VALUE#35 | BOOLEAN_VALUE #36 | <vetor_exp>;// | <chamar_function>;
+
+<vetor_exp> ::= ID #3 ABRIR_COLCHETES <exp> FECHAR_COLCHETES;
+
+<lista_termo>::= <termo>#15 | <lista_termo> VIRGULA <termo>;
 
 <op_rel> ::= MAIOR |MENOR | MENOR_IGUAL | MAIOR_IGUAL | IGUAL | DIFERENTE; 
 <op_neg> ::= BITWISE_NOT | INVERTER;
@@ -240,27 +245,30 @@ CHAR_VALUE: '( {LETTER} | {NUMBER} | {UNDERSCORE} | {OTHERS} | {CHARACTER} ) '
 
 <declarar_vetor>::= <tipo> <lista_ids> ABRIR_COLCHETES INT_VALUE #12 FECHAR_COLCHETES #9;
 <declarar_vetor_multi>::=  <lista_ids> ABRIR_COLCHETES INT_VALUE #12 FECHAR_COLCHETES #9 |<lista_ids> ABRIR_COLCHETES INT_VALUE #12 FECHAR_COLCHETES#9 <declarar_vetor_multi> ;
-<vetor>::= ID ABRIR_COLCHETES <exp> #12 FECHAR_COLCHETES #9;
-<vetor_parametro> ::= ID #2 ABRIR_COLCHETES FECHAR_COLCHETES #9 | <tipo> ID #2 ABRIR_COLCHETES <exp> #12 FECHAR_COLCHETES #9;
+<vetor>::= ID #4 ABRIR_COLCHETES <exp> #19 FECHAR_COLCHETES;
+
+<vetor_parametro> ::= ID #2 ABRIR_COLCHETES FECHAR_COLCHETES #9 | ID #2 ABRIR_COLCHETES <exp> #19 FECHAR_COLCHETES #9;
 
 <escopo>::= ABRIR_CHAVES #10 <lista_cmd> FECHAR_CHAVES #11;
 <lacos_repeticao>::= <laco_while> | <laco_do_while> | <laco_for>;
-<laco_while>::= WHILE ABRIR_PARENTESES <exp> FECHAR_PARENTESES <escopo>;
-<laco_do_while>::= DO  <escopo> WHILE ABRIR_PARENTESES <exp> FECHAR_PARENTESES PONTO_E_VIRGULA;
+<laco_while>::= WHILE ABRIR_PARENTESES <exp> #19 FECHAR_PARENTESES <escopo>;
+<laco_do_while>::= DO  <escopo> WHILE ABRIR_PARENTESES <exp> #19 FECHAR_PARENTESES PONTO_E_VIRGULA;
 <laco_for>::= FOR ABRIR_PARENTESES <condicao_for> FECHAR_PARENTESES <escopo>;
 
-<condicao_for>::= <declarar_var> <exp> PONTO_E_VIRGULA <atribuicao_variavel>|<atribuicao_variavel> PONTO_E_VIRGULA <exp> PONTO_E_VIRGULA <atribuicao_variavel>;
+<condicao_for>::= <declarar_var> <exp> #19 PONTO_E_VIRGULA <atribuicao_variavel> | <atribuicao_variavel> PONTO_E_VIRGULA <exp> #19 PONTO_E_VIRGULA <atribuicao_variavel>;
 
 <declarar_desvio>::= <if> | <if_else>;
-<if>::= IF ABRIR_PARENTESES <exp> FECHAR_PARENTESES <escopo>;
-<if_else>::= <if> ELSE <escopo>| <if> ELSE<declarar_desvio>;
+<if>::= IF ABRIR_PARENTESES <exp> #19 FECHAR_PARENTESES <escopo>;
+<if_else>::= <if> ELSE <escopo> | <if> ELSE<declarar_desvio>;
+
+<saidas> ::= STRING_VALUE #14 | ID #14 | CHAR #14; //| <vetor> #14;
 
 <in_out>::= <cin>  PONTO_E_VIRGULA | <cout> PONTO_E_VIRGULA | <printf> | <scanf>;
-<cin>::= CIN RIGHTSHIFT <vetor> | CIN RIGHTSHIFT ID  | CIN RIGHTSHIFT <vetor> <cin_mult> | CIN RIGHTSHIFT ID <cin_mult>  ;
-<cin_mult>::= RIGHTSHIFT <vetor> | RIGHTSHIFT <vetor> <cin_mult> | RIGHTSHIFT ID | RIGHTSHIFT ID <cin_mult>;
-<cout>::= COUT LEFTSHIFT <termo> |  COUT LEFTSHIFT <termo> <cout_multi> ;
-<cout_multi>::=  LEFTSHIFT <termo>|  LEFTSHIFT <termo> <cout_multi>;
-<printf>::=PRINTF  ABRIR_PARENTESES <lista_termo> FECHAR_PARENTESES PONTO_E_VIRGULA;
+<cin>::= CIN RIGHTSHIFT <vetor> | CIN RIGHTSHIFT ID #5 | CIN RIGHTSHIFT <vetor> <cin_mult> | CIN RIGHTSHIFT ID #5<cin_mult>;
+<cin_mult>::= RIGHTSHIFT <vetor> | RIGHTSHIFT <vetor> <cin_mult> | RIGHTSHIFT ID #5 | RIGHTSHIFT ID #5 <cin_mult>;
+<cout>::= COUT LEFTSHIFT <saidas> |  COUT LEFTSHIFT <saidas> <cout_multi> ;
+<cout_multi>::=  LEFTSHIFT <saidas> |  LEFTSHIFT <saidas> <cout_multi>;
+<printf>::= PRINTF ABRIR_PARENTESES <lista_termo> FECHAR_PARENTESES PONTO_E_VIRGULA;
 <scanf>::= SCANF ABRIR_PARENTESES<lista_termo> FECHAR_PARENTESES PONTO_E_VIRGULA;
 
 <declarar_function>::= <tipo> ID #7 ABRIR_PARENTESES FECHAR_PARENTESES #8 | VOID #1 ID #7 ABRIR_PARENTESES FECHAR_PARENTESES #8;
