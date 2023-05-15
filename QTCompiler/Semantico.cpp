@@ -12,6 +12,9 @@ stack<int> stackEscopo;
 Warning war;
 int escopo = 0;
 Simbolo * ptrSim;
+Simbolo * lastSimbol;
+Simbolo * ptrAtribuir;
+list<Simbolo*> lstExp;
 
 void Simbolo::DeclararTipo(std::string t){
     tipo = t;
@@ -35,6 +38,7 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
 
     string lexema = token->getLexeme();
     stack<int> temp;
+    bool setInitialized;
 
     if(stackEscopo.empty())
         stackEscopo.push(escopo);
@@ -61,9 +65,12 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
             Tabela.lstSimbolos.push_front(simbolo);
 
             ptrSim = &Tabela.lstSimbolos.front();
+            lastSimbol = &Tabela.lstSimbolos.front();
         }
         else
         {
+            ResetaTabela();
+            Tabela.setUnusedWarning();
             throw SemanticError("Variavel com mesmo nome declarada.", token->getPosition());
         }
         break;
@@ -73,30 +80,40 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
 
         if( ptrSim != nullptr )
         {
-            if( ptrSim->inicializado == false )
-                Tabela.setUsingUndefinedWarning(*ptrSim);
+            lstExp.push_back(ptrSim);
+            /*
+            if( ptrSim->inicializado == false ){
 
-            ptrSim->usado = true;
+                Tabela.setUsingUndefinedWarning(*ptrSim);
+            }
+
+            if( ptrSim != ptrAtribuir )
+                ptrSim->usado = true;
+            */
         }
         else
         {
+            ResetaTabela();
             Tabela.setUnusedWarning();
             throw SemanticError("Tentativa de utilizacao de variavel nao existe no escopo.", token->getPosition());
         }
         break;
 
     case 4:
-        ptrSim = Tabela.Find( stackEscopo, token->getLexeme() ) ;
+        ptrAtribuir = Tabela.Find( stackEscopo, token->getLexeme() );
+        lstExp.clear();
 
-        if( ptrSim != nullptr )
+        if( ptrAtribuir != nullptr )
         {
-            ptrSim->inicializado = true;
+
         }
         else
         {
+            ResetaTabela();
             Tabela.setUnusedWarning();
             throw SemanticError("Tentativa de atribuicao de variavel nao existente.", token->getPosition());
         }
+
         break;
 
     case 5:
@@ -106,19 +123,62 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
         {
             if( ptrSim->inicializado == false )
             {
-                Tabela.setUsingUndefinedWarning(*ptrSim, "Sera utilizado lixo de memoria em acao ( var++ )");
+                Tabela.setUsingUndefinedWarning(*ptrSim, "Sera utilizado lixo de memoria em acao ( var++ ou var += var )");
             }
         }
+        else
+        {
+            ResetaTabela();
+            Tabela.setUnusedWarning();
+            throw SemanticError("Tentativa de utilizar variavel nao existente.", token->getPosition());
+        }
+
         break;
 
     case 6:
-        ptrSim->inicializado = true;
+        setInitialized = true;
+
+        for( Simbolo * ptr : lstExp )
+        {
+            if( ptr->escopo == lastSimbol->escopo && ptr->id == lastSimbol->id )
+            {
+                if( lastSimbol->inicializado == false ){
+                    Tabela.setUsingUndefinedWarning(*lastSimbol, token->getLexeme());
+                    //Tabela.setUsingUndefinedWarning(*lastSimbol, "Utilizacao da variavel na atribuicao da mesma");
+                }
+                setInitialized = false;
+            }
+            else
+            {
+                ptr->usado = true;
+                if( !ptr->inicializado )
+                    Tabela.setUsingUndefinedWarning(*ptr);
+            }
+        }
+        if( setInitialized )
+        {
+            lastSimbol->inicializado = true;
+        }
+
+        lstExp.clear();
+        /*
+        if( token->getLexeme() == lastSimbol->id && lastSimbol->inicializado == false )
+        {
+            lastSimbol->inicializado = false;
+            lastSimbol->usado = false;
+        }
+        else
+        {
+            lastSimbol->inicializado = true;
+        }
+        */
         break;
 
     case 7:
 
         if( Tabela.Procurar(stackEscopo, token->getLexeme()) )
         {
+            ResetaTabela();
             Tabela.setUnusedWarning();
             throw SemanticError("Variavel com mesmo nome declarada", token->getPosition());
         }
@@ -137,6 +197,7 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
         break;
 
     case 9:
+        /// dar visoiada;
         ptrSim->vetor = true;
         break;
 
@@ -146,11 +207,20 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
         break;
 
     case 11:
+        if(stackEscopo.empty())
+        {
+            throw SemanticError("} inesperado", token->getPosition());
+        }
         stackEscopo.pop();
         break;
 
     case 12:
-        ptrSim->posVetor = stoi(token->getLexeme());
+        if(lastSimbol == nullptr)
+        {
+            throw SemanticError("Vetor inesperado", token->getPosition());
+        }
+        lastSimbol->posVetor = stoi(token->getLexeme());
+        //ptrSim->posVetor = stoi(token->getLexeme());
         break;
 
     case 13 :
@@ -168,7 +238,55 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
             temp.pop();
         }
         Tabela.setUnusedWarning();
+        ResetaTabela();
         throw SemanticError("Funcao inexistene no escopo. ", token->getPosition());
+        break;
+
+    case 16:
+        setInitialized = true;
+
+        for( Simbolo * ptr : lstExp )
+        {
+            if( ptrAtribuir->escopo == ptr->escopo && ptrAtribuir->id == ptr->id )
+            {
+                if ( ptrAtribuir->inicializado == false )
+                {
+                    Tabela.setUsingUndefinedWarning(*lastSimbol, token->getLexeme());
+                    Tabela.setUsingUndefinedWarning(*lastSimbol, "Utilizacao da variavel na atribuicao da mesma");
+                    setInitialized = false;
+                }
+            }
+            else
+            {
+                if( !ptr->inicializado )
+                    Tabela.setUsingUndefinedWarning(*ptr);
+                ptr->usado = true;
+            }
+        }
+
+        if( setInitialized )
+        {
+            ptrAtribuir->inicializado = true;
+        }
+        /*
+        if( ptrAtribuir->id == token->getLexeme() )
+        {
+            Tabela.setUsingUndefinedWarning(*ptrSim);
+            ptrSim->inicializado = false;
+        }
+        else
+        {
+            ptrSim->inicializado = true;
+        }
+        */
+        lstExp.clear();
+        break;
+    case 19:
+        for( Simbolo * ptr : lstExp )
+        {
+            ptr->usado = true;
+        }
+        lstExp.clear();
         break;
     case 20:
         Tabela.setUnusedWarning();

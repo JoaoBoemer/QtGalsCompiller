@@ -53,8 +53,10 @@ void Compiler::on_btnCompile_clicked()
         {
             warning.append("Warning: ");
             warning.append(war.error);
-            warning.append(" var: ");
+            warning.append(" | Var: ");
             warning.append(war.sim.id);
+            warning.append(" | Escopo: ");
+            warning.append(to_string(war.sim.escopo));
             warning.append("\n");
         }
         ui->txtResult->setText(warning.c_str());
@@ -63,31 +65,37 @@ void Compiler::on_btnCompile_clicked()
     }
     catch( LexicalError e )
     {
+        /*
         for(Warning war : this->sem->Tabela.lstWarning)
         {
             warning.append("Warning: ");
             warning.append(war.error);
-            warning.append(" var: ");
+            warning.append(" | Var: ");
             warning.append(war.sim.id);
+            warning.append(" | Escopo: ");
+            warning.append(war.sim.escopo);
             warning.append("\n");
         }
         ui->txtResult->setText(warning.c_str());
-
-        ui->txtResult->append(e.getMessage());
+        */
+        ui->txtResult->setText(e.getMessage());
     }
     catch ( SyntaticError e )
     {
+        /*
         for(Warning war : this->sem->Tabela.lstWarning)
         {
             warning.append("Warning: ");
             warning.append(war.error);
-            warning.append(" var: ");
+            warning.append(" | Var: ");
             warning.append(war.sim.id);
+            warning.append(" | Escopo: ");
+            warning.append(war.sim.escopo);
             warning.append("\n");
         }
         ui->txtResult->setText(warning.c_str());
-
-        ui->txtResult->append(e.getMessage());
+        */
+        ui->txtResult->setText(e.getMessage());
     }
     catch ( SemanticError e )
     {
@@ -95,8 +103,10 @@ void Compiler::on_btnCompile_clicked()
         {
             warning.append("Warning: ");
             warning.append(war.error);
-            warning.append(" var: ");
+            warning.append(" | Var: ");
             warning.append(war.sim.id);
+            warning.append(" | Escopo: ");
+            warning.append(to_string(war.sim.escopo));
             warning.append("\n");
         }
         ui->txtResult->setText(warning.c_str());
