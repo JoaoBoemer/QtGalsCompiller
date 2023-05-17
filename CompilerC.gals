@@ -199,9 +199,9 @@ CHAR_VALUE: '( {LETTER} | {NUMBER} | {UNDERSCORE} | {OTHERS} | {CHARACTER} ) '
 
 <lista_ids>::= <lista_ids> VIRGULA ID #2 | ID #2;
 
-<atribuir_multi> ::= VIRGULA <lista_ids> ATRIBUICAO <exp> #6 | VIRGULA <lista_ids> ATRIBUICAO <exp> #6 <atribuir_multi> | VIRGULA <lista_ids>;
+<atribuir_multi> ::= VIRGULA <lista_ids> ATRIBUICAO <exp> #6 #51 #19 | VIRGULA <lista_ids> ATRIBUICAO <exp> #6 #51 #19 <atribuir_multi> | VIRGULA <lista_ids>;
 
-<declarar_var>::= <tipo> <lista_ids> PONTO_E_VIRGULA | <tipo> <lista_ids> ATRIBUICAO <exp> #6 PONTO_E_VIRGULA | <tipo> <lista_ids> ATRIBUICAO <exp> #6 <atribuir_multi> PONTO_E_VIRGULA
+<declarar_var>::= <tipo> <lista_ids> PONTO_E_VIRGULA | <tipo> <lista_ids> ATRIBUICAO <exp> #6 #51 #19 PONTO_E_VIRGULA | <tipo> <lista_ids> ATRIBUICAO <exp> #6 #51 #19 <atribuir_multi> PONTO_E_VIRGULA
 		| <ponteiros> PONTO_E_VIRGULA |<declarar_vetor>  PONTO_E_VIRGULA
 	         |<declarar_vetor> VIRGULA <lista_ids> PONTO_E_VIRGULA | <declarar_vetor> VIRGULA <declarar_vetor_multi> PONTO_E_VIRGULA;// | <tipo> ID #2 ATRIBUICAO <chamar_function> PONTO_E_VIRGULA;
 
@@ -219,35 +219,37 @@ CHAR_VALUE: '( {LETTER} | {NUMBER} | {UNDERSCORE} | {OTHERS} | {CHARACTER} ) '
 <atribuicao>::= ID #5 <op_arit_baixa> ATRIBUICAO <exp>; // | ID <op_arit_alta> ATRIBUICAO<exp> ;
 
 //<exp>  ::= <exp> ATRIBUICAO <exp0> | <exp0>;
-<exp> ::= <exp> OR #30 <exp1> | <exp1>;
-<exp1> ::= <exp1> AND <exp2> | <exp2>;
+<exp> ::= <exp> OR #45 <exp1> | <exp1>;
+<exp1> ::= <exp1> AND #45 <exp2> | <exp2>;
 <exp2> ::= <exp2> BITWISE_OR <exp3> | <exp3>;
 <exp3> ::= <exp3> BITWISE_XOR <exp4> | <exp4>;
 <exp4> ::= <exp4> BITWISE_AND <exp5> | <exp5>;
-<exp5> ::= <exp5> <op_rel> <exp6> | <exp6>;
+<exp5> ::= <exp5> <op_rel> #45 <exp6> | <exp6>;
 <exp6> ::= <exp6> <op_bitwise> <exp7> | <exp7>;
 <exp7> ::= <exp7> <op_arit_baixa> <exp8> | <exp8>;
 <exp8> ::= <exp8> <op_arit_alta> <exp9> | <exp9> ;
-<exp9> ::= <op_neg> <exp10>#15 | <exp10> #15;
-<exp10> ::= <termo> | ABRIR_PARENTESES <exp> FECHAR_PARENTESES;
+<exp9> ::= <op_neg> #46 <exp10> | <exp10> ;
+<exp10> ::= <termo> | ABRIR_PARENTESES #47 <exp> FECHAR_PARENTESES;
 
 <termo> ::= ID #3 | INT_VALUE #31 | FLOAT_VALUE #32 | DOUBLE_VALUE #33 | CHAR_VALUE#34 | STRING_VALUE#35 | BOOLEAN_VALUE #36 | <vetor_exp>;// | <chamar_function>;
 
 <vetor_exp> ::= ID #3 ABRIR_COLCHETES <exp> FECHAR_COLCHETES;
 
-<lista_termo>::= <termo>#15 | <lista_termo> VIRGULA <termo>;
+<lista_termo>::= <termo> | <lista_termo> VIRGULA <termo>;
 
-<op_rel> ::= MAIOR |MENOR | MENOR_IGUAL | MAIOR_IGUAL | IGUAL | DIFERENTE; 
+<op_rel> ::= MAIOR | MENOR | MENOR_IGUAL | MAIOR_IGUAL | IGUAL | DIFERENTE; 
 <op_neg> ::= BITWISE_NOT | INVERTER;
 <op_bitwise> ::= RIGHTSHIFT | LEFTSHIFT;
-<op_arit_baixa> ::= MAIS | MENOS ;
-<op_arit_alta> ::= MULTIPLICACAO | DIVISAO | MOD;
+<op_arit_baixa> ::= MAIS #40 | MENOS #41;
+<op_arit_alta> ::= MULTIPLICACAO #42 | DIVISAO #43 | MOD #44;
 
 <declarar_vetor>::= <tipo> <lista_ids> ABRIR_COLCHETES INT_VALUE #12 FECHAR_COLCHETES #9;
 <declarar_vetor_multi>::=  <lista_ids> ABRIR_COLCHETES INT_VALUE #12 FECHAR_COLCHETES #9 |<lista_ids> ABRIR_COLCHETES INT_VALUE #12 FECHAR_COLCHETES#9 <declarar_vetor_multi> ;
 <vetor>::= ID #4 ABRIR_COLCHETES <exp> #19 FECHAR_COLCHETES;
 
-<vetor_parametro> ::= ID #2 ABRIR_COLCHETES FECHAR_COLCHETES #9 | ID #2 ABRIR_COLCHETES <exp> #19 FECHAR_COLCHETES #9;
+<vetor_parametro> ::= ID #2 ABRIR_COLCHETES FECHAR_COLCHETES #9 | ID #2 ABRIR_COLCHETES INT_VALUE #12 #19 FECHAR_COLCHETES #9;
+
+//<vetor_io> ::= ID #5 ABRIR_COLCHETES <exp> #19 FECHAR_COLCHETES;
 
 <escopo>::= ABRIR_CHAVES #10 <lista_cmd> FECHAR_CHAVES #11;
 <lacos_repeticao>::= <laco_while> | <laco_do_while> | <laco_for>;
@@ -258,10 +260,10 @@ CHAR_VALUE: '( {LETTER} | {NUMBER} | {UNDERSCORE} | {OTHERS} | {CHARACTER} ) '
 <condicao_for>::= <declarar_var> <exp> #19 PONTO_E_VIRGULA <atribuicao_variavel> | <atribuicao_variavel> PONTO_E_VIRGULA <exp> #19 PONTO_E_VIRGULA <atribuicao_variavel>;
 
 <declarar_desvio>::= <if> | <if_else>;
-<if>::= IF ABRIR_PARENTESES <exp> #19 FECHAR_PARENTESES <escopo>;
+<if>::= IF ABRIR_PARENTESES <exp> #51 FECHAR_PARENTESES <escopo>;
 <if_else>::= <if> ELSE <escopo> | <if> ELSE<declarar_desvio>;
 
-<saidas> ::= STRING_VALUE #14 | ID #14 | CHAR #14; //| <vetor> #14;
+<saidas> ::= STRING_VALUE | ID #21 | CHAR | <vetor> #14;
 
 <in_out>::= <cin>  PONTO_E_VIRGULA | <cout> PONTO_E_VIRGULA | <printf> | <scanf>;
 <cin>::= CIN RIGHTSHIFT <vetor> | CIN RIGHTSHIFT ID #5 | CIN RIGHTSHIFT <vetor> <cin_mult> | CIN RIGHTSHIFT ID #5<cin_mult>;
