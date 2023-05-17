@@ -28,7 +28,8 @@ HEADERS += \
     SyntaticError.h \
     Token.h \
     compiler.h \
-    frmtabela.h
+    frmtabela.h \
+    semantictable.h
 
 FORMS += \
     compiler.ui \
