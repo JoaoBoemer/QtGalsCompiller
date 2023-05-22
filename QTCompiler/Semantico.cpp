@@ -18,6 +18,8 @@ Simbolo * ptrAtribuir;
 list<Simbolo*> lstExp;
 list<int> lstExpType;
 list<int> lstOperators;
+list<int>::iterator it;
+int return_type = -1;
 
 void Simbolo::DeclararTipo(std::string t){
     tipo = t;
@@ -58,12 +60,10 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
     string lexema = token->getLexeme();
     stack<int> temp;
     bool setInitialized;
-    int operator_value;
     int pos;
     int value_1;
     int value_2;
-    int j;
-    int result_type;
+    int max;
 
     if(stackEscopo.empty())
         stackEscopo.push(escopo);
@@ -107,15 +107,6 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
         {
             lstExp.push_back(ptrSim);
             lstExpType.push_back(ConvertType( ptrSim->tipo ) );
-            /*
-            if( ptrSim->inicializado == false ){
-
-                Tabela.setUsingUndefinedWarning(*ptrSim);
-            }
-
-            if( ptrSim != ptrAtribuir )
-                ptrSim->usado = true;
-            */
         }
         else
         {
@@ -243,7 +234,6 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
             throw SemanticError("Vetor inesperado", token->getPosition());
         }
         lastSimbol->posVetor = stoi(token->getLexeme());
-        //ptrSim->posVetor = stoi(token->getLexeme());
         break;
 
     case 13 :
@@ -274,7 +264,6 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
             {
                 if ( ptrAtribuir->inicializado == false )
                 {
-                    //Tabela.setUsingUndefinedWarning(*lastSimbol, token->getLexeme());
                     Tabela.setUsingUndefinedWarning(*ptrAtribuir, "Utilizacao da variavel na atribuicao da mesma");
                     setInitialized = false;
                 }
@@ -330,39 +319,42 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
 
         // Valores
     case 31:
-        lstExpType.push_back(1);
+        lstExpType.push_back(0); // Int
         break;
     case 32:
-        lstExpType.push_back(2);
+        lstExpType.push_back(1); // Float
         break;
     case 33:
-        lstExpType.push_back(3);
+        //lstExpType.push_back(3); // Double
         break;
     case 34:
-        lstExpType.push_back(4);
+        lstExpType.push_back(2); // Char
         break;
     case 35:
-        lstExpType.push_back(5);
+        lstExpType.push_back(3); // String
+        break;
+    case 36:
+        lstExpType.push_back(4); // Boolean
         break;
 
         // Peso das Expressões
     case 40:
-        lstOperators.push_back(0);
+        lstOperators.push_back(0); // Mais ( + )
         break;
     case 41:
-        lstOperators.push_back(1);
+        lstOperators.push_back(1); // Menos ( - )
         break;
     case 42:
-        lstOperators.push_back(2);
+        lstOperators.push_back(2); // Vezes ( * )
         break;
     case 43:
-        lstOperators.push_back(3);
+        lstOperators.push_back(3); // Divisão ( / )
         break;
     case 44:
-        lstOperators.push_back(4);
+        lstOperators.push_back(4); // MOD ( % )
         break;
     case 45:
-        lstOperators.push_back(5);
+        lstOperators.push_back(5); // Relacionais ( >, <,  <=, >=, ==, != )
         break;
     case 46:
         // Negate
@@ -370,51 +362,87 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
         break;
     case 47:
         //ponteiro para lista
-        //lstOperators.push_back(1);
+        // Parenteses
         break;
 
         // Leitura da expressão
     case 51:
-        operator_value = 0;
+        max = 0;
+        return_type = 0;
+
         pos = 0;
-        j = 0;
-        value_1 = 0;
-        value_2 = 0;
-        result_type = 0;
-
-        if(lstExpType.size() < 2)
-            return;
-
-        for ( int i : lstOperators )
+        std::cout << "Lista de tipos: ";
+        for(int i : lstExpType)
         {
-            if( i > operator_value )
-            {
-                operator_value = i;
-                break;
-            }
-            pos++;
+            std::cout << "\nPosicao: " << pos << " Tipo: " << i << "\n";
+            pos ++;
         }
 
-        for( int i : lstExpType )
+        while(lstOperators.size() != 0)
         {
-            if( j == pos )
+            std::cout << "\nSIZE = " << lstOperators.size();
+            if(lstOperators.size() == 1)
             {
-                value_1 = i;
+                value_1 = lstExpType.front();
+                value_2 = lstExpType.back();
+                max = lstOperators.front();
+                return_type = semanticTable.resultType(value_1, value_2, max);
+                lstOperators.clear();
+                lstExpType.clear();
+                if(return_type == -1)
+                {
+                    throw SemanticError("Erro na expressao, tipos invalidos.", token->getPosition());
+                }
+                lstExpType.push_back(return_type);
             }
-            if( j == pos+1 )
+            if(lstOperators.size() > 1)
             {
-                value_2 = i;
-                break;
+                // Pega a expressão com maior prioridade
+                max = 0;
+                for ( int i : lstOperators )
+                {
+                    if( i > max )
+                        max = i;
+                }
+                // Pega a posição da primeira expressão com maior prioridade
+                pos = 0;
+                for( int i : lstOperators )
+                {
+                    if( max == i )
+                        break;
+                    pos++;
+                }
+                it = lstOperators.begin();
+                advance(it, pos);
+                lstOperators.erase(it);
+
+                it = lstExpType.begin();
+                advance(it, pos);
+                value_1 = *it; // Pega o valor na mesma posição na lista de tipos
+                it = lstExpType.erase(it);
+                value_2 = *it; // Pega o proximo valor na lista de tipos
+                it = lstExpType.erase(it);
+                return_type = semanticTable.resultType(value_1, value_2, max); // Verifica a expressão ( valor_1, max (operador), valor_2 )
+
+                if(return_type == -1)
+                {
+                    throw SemanticError("Erro na expressao, tipos invalidos.", token->getPosition());
+                }
+
+                if(return_type == 1)
+                {
+                    std::cout << "DEU WARNING";
+                }
+
+                lstExpType.insert(it, return_type);
             }
-            j ++;
         }
-        result_type = semanticTable.resultType(value_1, value_2, operator_value);
 
-        if( result_type == -1 )
-            throw SemanticError("Tentativa de leitura de variavel inexistente.", token->getPosition());
-        //lstExpType in pos && pos +1;
-
-
+        if( lstExpType.size() > 1 )
+            std::cout << "DEU ALGO DE ERRADO, EXPRESSAO COM MAIS DE UM VALOR RESTANTE!";
+        return_type = lstExpType.front();
+        lstExpType.clear();
+        std::cout << "\nRetorno: " << return_type << "\n";
         break;
     }
-    }
+}
