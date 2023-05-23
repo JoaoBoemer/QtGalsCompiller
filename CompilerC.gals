@@ -199,15 +199,15 @@ CHAR_VALUE: '( {LETTER} | {NUMBER} | {UNDERSCORE} | {OTHERS} | {CHARACTER} ) '
 
 <lista_ids>::= <lista_ids> VIRGULA ID #2 | ID #2;
 
-<atribuir_multi> ::= VIRGULA <lista_ids> ATRIBUICAO <exp> #6 #51 #19 | VIRGULA <lista_ids> ATRIBUICAO <exp> #6 #51 #19 <atribuir_multi> | VIRGULA <lista_ids>;
+<atribuir_multi> ::= VIRGULA <lista_ids> ATRIBUICAO <exp> #51 #6 #19 | VIRGULA <lista_ids> ATRIBUICAO <exp> #51 #6 #19 <atribuir_multi> | VIRGULA <lista_ids>;
 
-<declarar_var>::= <tipo> <lista_ids> PONTO_E_VIRGULA | <tipo> <lista_ids> ATRIBUICAO <exp> #6 #51 #19 PONTO_E_VIRGULA | <tipo> <lista_ids> ATRIBUICAO <exp> #6 #51 #19 <atribuir_multi> PONTO_E_VIRGULA
+<declarar_var>::= <tipo> <lista_ids> PONTO_E_VIRGULA | <tipo> <lista_ids> ATRIBUICAO <exp> #51 #6 #19 PONTO_E_VIRGULA | <tipo> <lista_ids> ATRIBUICAO <exp> #51 #6 #19 <atribuir_multi> PONTO_E_VIRGULA
 		| <ponteiros> PONTO_E_VIRGULA |<declarar_vetor>  PONTO_E_VIRGULA
 	         |<declarar_vetor> VIRGULA <lista_ids> PONTO_E_VIRGULA | <declarar_vetor> VIRGULA <declarar_vetor_multi> PONTO_E_VIRGULA;// | <tipo> ID #2 ATRIBUICAO <chamar_function> PONTO_E_VIRGULA;
 
 <tipo>::= BOOL #1 | INT #1 | CHAR #1 | STRING #1 | FLOAT #1 | DOUBLE #1;
 
-<atribuicao_variavel> ::=  ID #4 ATRIBUICAO <chamar_function> #17 | ID #4 ATRIBUICAO <exp> #16 | <mais_menos_um> | <vetor> ATRIBUICAO <exp> #16 | <atribuicao> | <vetor> ATRIBUICAO <chamar_function> #17;
+<atribuicao_variavel> ::=  ID #4 ATRIBUICAO <chamar_function> #17 | ID #4 ATRIBUICAO <exp> #51 #16 | <mais_menos_um> | <vetor> ATRIBUICAO <exp> #51 #16 | <atribuicao> | <vetor> ATRIBUICAO <chamar_function> #17;
 
 <ponteiros>::=  <tipo> MULTIPLICACAO <lista_ids>;
 <ponteiro> ::= <tipo> MULTIPLICACAO ID;
