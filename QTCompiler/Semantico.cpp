@@ -266,18 +266,26 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
         throw SemanticError("Funcao inexistene no escopo. ", token->getPosition());
         break;
 
+    case 14: // GERACAO DE CODIGO ASSEMBLY - Saida de dados
+        Tabela.gera_cod("LDI", token->getLexeme());
+        Tabela.gera_cod("STO", "$out_port");
+        break;
+
+    case 15:
+
+        break;
+
     case 16:
         setInitialized = true;
 
 
         switch(semanticTable.atribType( ConvertType( ptrAtribuir->tipo) , return_type)){
-
-        case -1:
-            throw SemanticError("Erro na atribuicao de variavel.", token->getPosition());
-            break;
-        case 1:
-            Tabela.setWarning(*lastSimbol, "Perda de precisao" );
-            break;
+            case -1:
+                throw SemanticError("Erro na atribuicao de variavel.", token->getPosition());
+                break;
+            case 1:
+                Tabela.setWarning(*lastSimbol, "Perda de precisao" );
+                break;
         }
 
         for( Simbolo * ptr : lstExp )
@@ -307,6 +315,15 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
         break;
 
     case 17:
+        switch ( semanticTable.atribType( ConvertType(ptrAtribuir->tipo), return_type) )
+        {
+        case -1:
+            throw SemanticError("Erro ao tentar atribuir funcao em variavel", token->getPosition());
+
+        case 1:
+            Tabela.setWarning( *ptrAtribuir, "Perda de precisao");
+        }
+
         break;
 
     case 19:
@@ -317,6 +334,11 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
         lstExp.clear();
         lstExpType.clear();
         lstOperators.clear();
+
+        if(return_type != 4)
+        {
+            throw SemanticError("Boolean esperado na expressao do IF", token->getPosition());
+        }
         break;
     case 20:
 
@@ -340,6 +362,9 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
         {
             throw SemanticError("Tentativa de leitura de variavel inexistente.", token->getPosition());
         }
+
+        Tabela.gera_cod("LD", token->getLexeme());
+        Tabela.gera_cod("STO", "$out_port");
 
         break;
     case 22:
@@ -539,6 +564,8 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
                         }
                     }
                 }
+
+                lstExpValor.clear();
                 lstExpType.push_back(return_type);
             }
             if(lstOperators.size() > 1)
