@@ -245,25 +245,25 @@ CHAR_VALUE: '( {LETTER} | {NUMBER} | {UNDERSCORE} | {OTHERS} | {CHARACTER} ) '
 
 <declarar_vetor>::= <tipo> <lista_ids> ABRIR_COLCHETES INT_VALUE #12 FECHAR_COLCHETES #9;
 <declarar_vetor_multi>::=  <lista_ids> ABRIR_COLCHETES INT_VALUE #12 FECHAR_COLCHETES #9 |<lista_ids> ABRIR_COLCHETES INT_VALUE #12 FECHAR_COLCHETES#9 <declarar_vetor_multi> ;
-<vetor>::= ID #4 ABRIR_COLCHETES <exp> #19 FECHAR_COLCHETES;
+<vetor>::= ID #4 ABRIR_COLCHETES <exp> #51 #19 FECHAR_COLCHETES;
 
-<vetor_parametro> ::= ID #2 ABRIR_COLCHETES FECHAR_COLCHETES #9 | ID #2 ABRIR_COLCHETES INT_VALUE #12 #19 FECHAR_COLCHETES #9;
+<vetor_parametro> ::= ID #2 ABRIR_COLCHETES FECHAR_COLCHETES #9 | ID #2 ABRIR_COLCHETES INT_VALUE #12 FECHAR_COLCHETES #9;
 
 //<vetor_io> ::= ID #5 ABRIR_COLCHETES <exp> #19 FECHAR_COLCHETES;
 
 <escopo>::= ABRIR_CHAVES #10 <lista_cmd> FECHAR_CHAVES #11;
 <lacos_repeticao>::= <laco_while> | <laco_do_while> | <laco_for>;
-<laco_while>::= WHILE ABRIR_PARENTESES <exp> #19 FECHAR_PARENTESES <escopo>;
-<laco_do_while>::= DO  <escopo> WHILE ABRIR_PARENTESES <exp> #19 FECHAR_PARENTESES PONTO_E_VIRGULA;
+<laco_while>::= WHILE ABRIR_PARENTESES <exp> #51 #19 FECHAR_PARENTESES <escopo>;
+<laco_do_while>::= DO  <escopo> WHILE ABRIR_PARENTESES <exp> #51 #19 FECHAR_PARENTESES PONTO_E_VIRGULA;
 <laco_for>::= FOR ABRIR_PARENTESES <condicao_for> FECHAR_PARENTESES <escopo>;
 
 <condicao_for>::= <declarar_var> <exp> #19 PONTO_E_VIRGULA <atribuicao_variavel> | <atribuicao_variavel> PONTO_E_VIRGULA <exp> #19 PONTO_E_VIRGULA <atribuicao_variavel>;
 
 <declarar_desvio>::= <if> | <if_else>;
-<if>::= IF ABRIR_PARENTESES <exp> #51 FECHAR_PARENTESES <escopo>;
+<if>::= IF ABRIR_PARENTESES <exp> #51 #19 FECHAR_PARENTESES <escopo>;
 <if_else>::= <if> ELSE <escopo> | <if> ELSE<declarar_desvio>;
 
-<saidas> ::= STRING_VALUE | ID #21 | CHAR | <vetor> #14;
+<saidas> ::= STRING_VALUE #14 | ID #21 | CHAR #14 | <vetor> #15;
 
 <in_out>::= <cin>  PONTO_E_VIRGULA | <cout> PONTO_E_VIRGULA | <printf> | <scanf>;
 <cin>::= CIN RIGHTSHIFT <vetor> | CIN RIGHTSHIFT ID #5 | CIN RIGHTSHIFT <vetor> <cin_mult> | CIN RIGHTSHIFT ID #5<cin_mult>;
