@@ -17,11 +17,16 @@ Simbolo * lastSimbol;
 Simbolo * ptrAtribuir;
 list<Simbolo*> lstExp;
 pair<string, bool> par;
+pair<int, int> intPar;
 list<int> lstExpType;
-list<int> lstOperators;
+list<pair<int, int>> lstOperators;
 list<pair<string, bool>> lstExpValor;
 list<int>::iterator it;
+list<pair<int, int>>::iterator it_par;
+list<pair<string, bool>>::iterator it_val;
 int return_type = -1;
+
+bool firstVar = true;
 
 string store = "";
 
@@ -379,22 +384,34 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
 
         // Peso das Expressões
     case 40:
-        lstOperators.push_back(0); // Mais ( + )
+        intPar.first = 0;
+        intPar.second = 0;
+        lstOperators.push_back(intPar); // Mais ( + )
         break;
     case 41:
-        lstOperators.push_back(1); // Menos ( - )
+        intPar.first = 1;
+        intPar.second = 0;
+        lstOperators.push_back(intPar); // Menos ( - )
         break;
     case 42:
-        lstOperators.push_back(2); // Vezes ( * )
+        intPar.first = 2;
+        intPar.second = 1;
+        lstOperators.push_back(intPar); // Vezes ( * )
         break;
     case 43:
-        lstOperators.push_back(3); // Divisão ( / )
+        intPar.first = 3;
+        intPar.second = 1;
+        lstOperators.push_back(intPar); // Divisão ( / )
         break;
     case 44:
-        lstOperators.push_back(4); // MOD ( % )
+        intPar.first = 4;
+        intPar.second = 1;
+        lstOperators.push_back(intPar); // MOD ( % )
         break;
     case 45:
-        lstOperators.push_back(5); // Relacionais ( >, <,  <=, >=, ==, != )
+        intPar.first = 5;
+        intPar.second = 2;
+        lstOperators.push_back(intPar); // Relacionais ( >, <,  <=, >=, ==, != )
         break;
     case 46:
         // Negate
@@ -420,86 +437,10 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
 
         pos = 0;
         std::cout << "\nLista de operadores: ";
-        for(int i : lstOperators)
+        for(pair<int, int> i : lstOperators)
         {
-            std::cout << "\nOperador: " << pos << " Operador: " << i << "\n";
+            std::cout << "\nOperador: " << pos << " Operador: " << i.first << "\n";
             pos ++;
-        }
-
-        while(lstOperators.size() != 0)
-        {
-            std::cout << "SIZE = " << lstOperators.size() << "\n";
-            if(lstOperators.size() == 1)
-            {
-                value_1 = lstExpType.front();
-                value_2 = lstExpType.back();
-                max = lstOperators.front();
-                return_type = semanticTable.resultType(value_1, value_2, max);
-                lstOperators.clear();
-                lstExpType.clear();
-                if(return_type == -1)
-                {
-                    throw SemanticError("Erro na expressao, tipos invalidos.", token->getPosition());
-                }
-
-                if(max == 0)
-                {
-                    par = lstExpValor.front();
-                    if(par.second)
-                    {
-                        Tabela.gera_cod("ADD", par.first);
-                    }
-                    else
-                    {
-                        Tabela.gera_cod("ADDI", par.first);
-                    }
-
-                }
-
-                lstExpType.push_back(return_type);
-            }
-            if(lstOperators.size() > 1)
-            {
-                // Pega a expressão com maior prioridade
-                max = 0;
-                for ( int i : lstOperators )
-                {
-                    if( i > max )
-                        max = i;
-                }
-                // Pega a posição da primeira expressão com maior prioridade
-                pos = 0;
-                for( int i : lstOperators )
-                {
-                    if( max == i )
-                        break;
-                    pos++;
-                }
-                it = lstOperators.begin();
-                advance(it, pos);
-                lstOperators.erase(it);
-
-                it = lstExpType.begin();
-                advance(it, pos);
-                value_1 = *it; // Pega o valor na mesma posição na lista de tipos
-                it = lstExpType.erase(it);
-                value_2 = *it; // Pega o proximo valor na lista de tipos
-                it = lstExpType.erase(it);
-                return_type = semanticTable.resultType(value_1, value_2, max); // Verifica a expressão ( valor_1, max (operador), valor_2 )
-
-                if(return_type == -1)
-                {
-                    throw SemanticError("Erro na expressao, tipos invalidos.", token->getPosition());
-                }
-
-                if(max == 0)
-                {
-
-                    Tabela.gera_cod("ADD", to_string(value_2));
-                }
-
-                lstExpType.insert(it, return_type);
-            }
         }
 
         if(lstExpType.size() == 1 ) // SE FOR SO UM NUMERO
@@ -516,13 +457,210 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
 
         }
 
+        while(lstOperators.size() != 0)
+        {
+            std::cout << "SIZE = " << lstOperators.size() << "\n";
+            if(lstOperators.size() == 1) // ULTIMA ITERACAO
+            {
+                value_1 = lstExpType.front();
+                value_2 = lstExpType.back();
+                intPar = lstOperators.front();
+                return_type = semanticTable.resultType(value_1, value_2, intPar.first);
+                lstOperators.clear();
+                lstExpType.clear();
+                if(return_type == -1)
+                {
+                    throw SemanticError("Erro na expressao, tipos invalidos.", token->getPosition());
+                }
+
+                if(firstVar)
+                {
+                    par = lstExpValor.front();
+                    if(par.second)
+                    {
+                        Tabela.gera_cod("LD", par.first);
+                    }
+                    else
+                    {
+                        Tabela.gera_cod("LDI", par.first);
+                    }
+
+                    par = lstExpValor.back();
+
+                    if( intPar.first == 0 ) // ADICAO
+                    {
+                        if(par.second) // VARIAVEL?
+                        {
+                            Tabela.gera_cod("ADD", par.first); // SIM
+                        }
+                        else
+                        {
+                            Tabela.gera_cod("ADDI", par.first); // NAO
+                        }
+                    }
+                    else if( intPar.first == 1) // SUBTRACAO
+                    {
+                        if(par.second) // VARIAVEL?
+                        {
+                            Tabela.gera_cod("SUB", par.first); // SIM
+                        }
+                        else
+                        {
+                            Tabela.gera_cod("SUBI", par.first); // NAO
+                        }
+                    }
+
+                    firstVar = false;
+                }
+                else
+                {
+                    if( intPar.first == 0 ) // ADICAO
+                    {
+                        par = lstExpValor.front();
+                        if(par.second) // VARIAVEL?
+                        {
+                                Tabela.gera_cod("ADD", par.first); // SIM
+                        }
+                        else
+                        {
+                                Tabela.gera_cod("ADDI", par.first); // NAO
+                        }
+                    }
+                    else if( intPar.first == 1) // SUBTRACAO
+                    {
+                        par = lstExpValor.front();
+                        if(par.second) // VARIAVEL?
+                        {
+                                Tabela.gera_cod("SUB", par.first); // SIM
+                        }
+                        else
+                        {
+                                Tabela.gera_cod("SUBI", par.first); // NAO
+                        }
+                    }
+                }
+                lstExpType.push_back(return_type);
+            }
+            if(lstOperators.size() > 1)
+            {
+                // Pega a expressão com maior prioridade
+                intPar.first = -1;
+                intPar.second = -1;
+                for ( pair<int, int> i : lstOperators )
+                {
+                    if( i.second > intPar.second )
+                        intPar = i;
+                }
+                // Pega a posição da primeira expressão com maior prioridade
+                pos = 0;
+                for( pair<int, int> i : lstOperators )
+                {
+                    if( intPar.second == i.second )
+                        break;
+                    pos++;
+                }
+                it_par = lstOperators.begin();
+                advance(it_par, pos);
+                lstOperators.erase(it_par);
+
+                it = lstExpType.begin();
+                advance(it, pos);
+                value_1 = *it; // Pega o valor na mesma posição na lista de tipos
+                it = lstExpType.erase(it);
+                value_2 = *it; // Pega o proximo valor na lista de tipos
+                it = lstExpType.erase(it);
+                return_type = semanticTable.resultType(value_1, value_2, intPar.first); // Verifica a expressão ( valor_1, max (operador), valor_2 )
+
+                if(return_type == -1)
+                {
+                    throw SemanticError("Erro na expressao, tipos invalidos.", token->getPosition());
+                }
+
+                // GERACAO DE CODIGO ( apos a validacao apenas )
+                it_val = lstExpValor.begin();
+                advance(it_val, pos);
+                par = *it_val;
+                it_val = lstExpValor.erase(it_val);
+
+                if(firstVar) // PRIMEIRA ITERACAO?
+                {
+                    if(par.second) // VARIAVEl?
+                    {
+                        Tabela.gera_cod("LD", par.first); // SIM
+                    }
+                    else
+                    {
+                        Tabela.gera_cod("LDI", par.first); // NAO
+                    }
+                    par = *it_val;
+
+                    if ( intPar.first == 0 ) // ADICAO
+                    {
+                        if(par.second) // VARIAVEL?
+                        {
+                                Tabela.gera_cod("ADD", par.first); // SIM
+                        }
+                        else
+                        {
+                                Tabela.gera_cod("ADDI", par.first); // NAO
+                        }
+                    }
+                    else if( intPar.first == 1) // SUBTRACAO
+                    {
+                        if(par.second) // VARIAVEL?
+                        {
+                                Tabela.gera_cod("SUB", par.first); // SIM
+                        }
+                        else
+                        {
+                                Tabela.gera_cod("SUBI", par.first); // NAO
+                        }
+                    }
+                    it_val = lstExpValor.erase(it_val);
+
+                    firstVar = false; // JA FOI
+                }
+                else // NAO EH A PRIMEIRA ITERACAO
+                {
+                    if ( intPar.first == 0 ) // ADICAO
+                    {
+                        if(par.second) // VARIAVEL?
+                        {
+                            Tabela.gera_cod("ADD", par.first); // SIM
+                        }
+                        else
+                        {
+                            Tabela.gera_cod("ADDI", par.first); // NAO
+                        }
+                    }
+                    else if( intPar.first == 1) // SUBTRACAO
+                    {
+                        if(par.second) // VARIAVEL?
+                        {
+                            Tabela.gera_cod("SUB", par.first); // SIM
+                        }
+                        else
+                        {
+                            Tabela.gera_cod("SUBI", par.first); // NAO
+                        }
+                    }
+                }
+
+
+                lstExpType.insert(it, return_type);
+            }
+        }
+
         Tabela.gera_cod("STO", store);
 
         if( lstExpType.size() > 1 )
             std::cout << "DEU ALGO DE ERRADO, EXPRESSAO COM MAIS DE UM VALOR RESTANTE!";
         return_type = lstExpType.front();
-        lstExpType.clear();
         std::cout << "\nRetorno: " << return_type << "\n";
+
+        firstVar = true;
+        lstExpValor.clear();
+        lstExpType.clear();
         break;
     }
 }
