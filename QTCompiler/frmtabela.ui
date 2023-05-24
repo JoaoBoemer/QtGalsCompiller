@@ -26,6 +26,11 @@ background-color: rgb(30, 30, 30);</string>
        <height>0</height>
       </size>
      </property>
+     <property name="font">
+      <font>
+       <pointsize>14</pointsize>
+      </font>
+     </property>
      <property name="mouseTracking">
       <bool>false</bool>
      </property>

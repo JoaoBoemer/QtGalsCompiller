@@ -61,6 +61,8 @@ void Compiler::on_btnCompile_clicked()
         }
         ui->txtResult->setText(warning.c_str());
 
+        ui->txtResult->append(this->sem->Tabela.assembly.c_str());
+
         ui->txtResult->append("Compilou :D");
     }
     catch( LexicalError e )
@@ -73,6 +75,8 @@ void Compiler::on_btnCompile_clicked()
     }
     catch ( SemanticError e )
     {
+        if(this->sem != nullptr)
+            this->sem->Tabela.setUnusedWarning();
         for(Warning war : this->sem->Tabela.lstWarning)
         {
             warning.append("Warning: ");
