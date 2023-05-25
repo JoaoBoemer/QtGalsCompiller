@@ -253,21 +253,21 @@ CHAR_VALUE: '( {LETTER} | {NUMBER} | {UNDERSCORE} | {OTHERS} | {CHARACTER} ) '
 
 <escopo>::= ABRIR_CHAVES #10 <lista_cmd> FECHAR_CHAVES #11;
 <lacos_repeticao>::= <laco_while> | <laco_do_while> | <laco_for>;
-<laco_while>::= WHILE ABRIR_PARENTESES <exp> #51 #19 FECHAR_PARENTESES <escopo>;
-<laco_do_while>::= DO  <escopo> WHILE ABRIR_PARENTESES <exp> #51 #19 FECHAR_PARENTESES PONTO_E_VIRGULA;
+<laco_while>::= WHILE ABRIR_PARENTESES <exp> #51 #18 FECHAR_PARENTESES <escopo>;
+<laco_do_while>::= DO  <escopo> WHILE ABRIR_PARENTESES <exp> #51 #19 #18 FECHAR_PARENTESES PONTO_E_VIRGULA;
 <laco_for>::= FOR ABRIR_PARENTESES <condicao_for> FECHAR_PARENTESES <escopo>;
 
-<condicao_for>::= <declarar_var> <exp> #19 PONTO_E_VIRGULA <atribuicao_variavel> | <atribuicao_variavel> PONTO_E_VIRGULA <exp> #19 PONTO_E_VIRGULA <atribuicao_variavel>;
+<condicao_for>::= <declarar_var> <exp> #51 #19 #18 PONTO_E_VIRGULA <atribuicao_variavel> | <atribuicao_variavel> PONTO_E_VIRGULA <exp> #51 #19 #18 PONTO_E_VIRGULA <atribuicao_variavel>;
 
 <declarar_desvio>::= <if> | <if_else>;
-<if>::= IF ABRIR_PARENTESES <exp> #51 #19 FECHAR_PARENTESES <escopo>;
+<if>::= IF ABRIR_PARENTESES <exp> #51 #19 #18 FECHAR_PARENTESES <escopo>;
 <if_else>::= <if> ELSE <escopo> | <if> ELSE<declarar_desvio>;
 
 <saidas> ::= STRING_VALUE #14 | ID #21 | CHAR #14 | <vetor> #15;
 
 <in_out>::= <cin>  PONTO_E_VIRGULA | <cout> PONTO_E_VIRGULA | <printf> | <scanf>;
-<cin>::= CIN RIGHTSHIFT <vetor> | CIN RIGHTSHIFT ID #5 | CIN RIGHTSHIFT <vetor> <cin_mult> | CIN RIGHTSHIFT ID #5<cin_mult>;
-<cin_mult>::= RIGHTSHIFT <vetor> | RIGHTSHIFT <vetor> <cin_mult> | RIGHTSHIFT ID #5 | RIGHTSHIFT ID #5 <cin_mult>;
+<cin>::= CIN RIGHTSHIFT <vetor> | CIN RIGHTSHIFT ID #22 | CIN RIGHTSHIFT <vetor> <cin_mult> | CIN RIGHTSHIFT ID #22 <cin_mult>;
+<cin_mult>::= RIGHTSHIFT <vetor> | RIGHTSHIFT <vetor> <cin_mult> | RIGHTSHIFT ID #22 | RIGHTSHIFT ID #22 <cin_mult>;
 <cout>::= COUT LEFTSHIFT <saidas> |  COUT LEFTSHIFT <saidas> <cout_multi> ;
 <cout_multi>::=  LEFTSHIFT <saidas> |  LEFTSHIFT <saidas> <cout_multi>;
 <printf>::= PRINTF ABRIR_PARENTESES <lista_termo> FECHAR_PARENTESES PONTO_E_VIRGULA;
