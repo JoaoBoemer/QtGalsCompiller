@@ -16,10 +16,19 @@ Simbolo * ptrSim;
 Simbolo * lastSimbol;
 Simbolo * ptrAtribuir;
 list<Simbolo*> lstExp;
+pair<string, bool> par;
+pair<int, int> intPar;
 list<int> lstExpType;
-list<int> lstOperators;
+list<pair<int, int>> lstOperators;
+list<pair<string, bool>> lstExpValor;
 list<int>::iterator it;
+list<pair<int, int>>::iterator it_par;
+list<pair<string, bool>>::iterator it_val;
 int return_type = -1;
+
+bool firstVar = true;
+
+string store = "";
 
 void Simbolo::DeclararTipo(std::string t){
     tipo = t;
@@ -95,7 +104,7 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
         else
         {
             ResetaTabela();
-            Tabela.setUnusedWarning();
+            //Tabela.setUnusedWarning();
             throw SemanticError("Variavel com mesmo nome declarada.", token->getPosition());
         }
         break;
@@ -107,11 +116,14 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
         {
             lstExp.push_back(ptrSim);
             lstExpType.push_back(ConvertType( ptrSim->tipo ) );
+            par.first = ptrSim->id;
+            par.second = true;
+            lstExpValor.push_back(par);
         }
         else
         {
             ResetaTabela();
-            Tabela.setUnusedWarning();
+            //Tabela.setUnusedWarning();
             throw SemanticError("Tentativa de utilizacao de variavel nao existe no escopo.", token->getPosition());
         }
         break;
@@ -123,10 +135,11 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
         if( ptrAtribuir == nullptr )
         {
             ResetaTabela();
-            Tabela.setUnusedWarning();
+            //Tabela.setUnusedWarning();
             throw SemanticError("Tentativa de atribuicao de variavel nao existente.", token->getPosition());
-
         }
+
+        store = token->getLexeme();
 
         break;
 
@@ -137,13 +150,13 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
         {
             if( ptrSim->inicializado == false )
             {
-                Tabela.setUsingUndefinedWarning(*ptrSim, "Sera utilizado lixo de memoria em acao ( var++ ou var += var )");
+                Tabela.setWarning(*ptrSim, "Sera utilizado lixo de memoria em acao ( var++ ou var += var )");
             }
         }
         else
         {
             ResetaTabela();
-            Tabela.setUnusedWarning();
+            //Tabela.setUnusedWarning();
             throw SemanticError("Tentativa de utilizar variavel nao existente.", token->getPosition());
         }
 
@@ -152,12 +165,22 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
     case 6:
         setInitialized = true;
 
+        switch(semanticTable.atribType( ConvertType( lastSimbol->tipo) , return_type)){
+
+        case -1:
+            throw SemanticError("Erro na atribuicao de variavel.", token->getPosition());
+            break;
+        case 1:
+            Tabela.setWarning(*lastSimbol, "Perda de precisao" );
+            break;
+        }
+
         for( Simbolo * ptr : lstExp )
         {
             if( ptr->escopo == lastSimbol->escopo && ptr->id == lastSimbol->id )
             {
                 if( lastSimbol->inicializado == false ){
-                    Tabela.setUsingUndefinedWarning(*lastSimbol, "Utilizacao da variavel na atribuicao da mesma");
+                    Tabela.setWarning(*lastSimbol, "Utilizacao da variavel na atribuicao da mesma");
                 }
                 setInitialized = false;
             }
@@ -165,7 +188,7 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
             {
                 ptr->usado = true;
                 if( !ptr->inicializado )
-                    Tabela.setUsingUndefinedWarning(*ptr);
+                    Tabela.setWarning(*ptr);
             }
         }
         if( setInitialized )
@@ -174,17 +197,6 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
         }
 
         lstExp.clear();
-        /*
-        if( token->getLexeme() == lastSimbol->id && lastSimbol->inicializado == false )
-        {
-            lastSimbol->inicializado = false;
-            lastSimbol->usado = false;
-        }
-        else
-        {
-            lastSimbol->inicializado = true;
-        }
-        */
         break;
 
     case 7:
@@ -192,7 +204,7 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
         if( Tabela.Procurar(stackEscopo, token->getLexeme()) )
         {
             ResetaTabela();
-            Tabela.setUnusedWarning();
+            //Tabela.setUnusedWarning();
             throw SemanticError("Variavel com mesmo nome declarada", token->getPosition());
         }
 
@@ -249,13 +261,32 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
             }
             temp.pop();
         }
-        Tabela.setUnusedWarning();
+        //Tabela.setUnusedWarning();
         ResetaTabela();
         throw SemanticError("Funcao inexistene no escopo. ", token->getPosition());
         break;
 
+    case 14: // GERACAO DE CODIGO ASSEMBLY - Saida de dados
+        Tabela.gera_cod("LDI", token->getLexeme());
+        Tabela.gera_cod("STO", "$out_port");
+        break;
+
+    case 15:
+
+        break;
+
     case 16:
         setInitialized = true;
+
+
+        switch(semanticTable.atribType( ConvertType( ptrAtribuir->tipo) , return_type)){
+            case -1:
+                throw SemanticError("Erro na atribuicao de variavel.", token->getPosition());
+                break;
+            case 1:
+                Tabela.setWarning(*lastSimbol, "Perda de precisao" );
+                break;
+        }
 
         for( Simbolo * ptr : lstExp )
         {
@@ -263,14 +294,14 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
             {
                 if ( ptrAtribuir->inicializado == false )
                 {
-                    Tabela.setUsingUndefinedWarning(*ptrAtribuir, "Utilizacao da variavel na atribuicao da mesma");
+                    Tabela.setWarning(*ptrAtribuir, "Utilizacao da variavel na atribuicao da mesma");
                     setInitialized = false;
                 }
             }
             else
             {
                 if( !ptr->inicializado )
-                    Tabela.setUsingUndefinedWarning(*ptr);
+                    Tabela.setWarning(*ptr);
                 ptr->usado = true;
             }
         }
@@ -280,21 +311,46 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
             ptrAtribuir->inicializado = true;
         }
         lstExp.clear();
+
         break;
 
     case 17:
+        switch ( semanticTable.atribType( ConvertType(ptrAtribuir->tipo), return_type) )
+        {
+        case -1:
+            throw SemanticError("Erro ao tentar atribuir funcao em variavel", token->getPosition());
+
+        case 1:
+            Tabela.setWarning( *ptrAtribuir, "Perda de precisao");
+        }
+
         break;
 
+    case 18:
+        if(return_type != 4)
+        {
+            throw SemanticError("Boolean esperado na expressao", token->getPosition());
+        }
+        break;
     case 19:
         for( Simbolo * ptr : lstExp )
         {
+            if(ptr->inicializado == false )
+            {
+                Tabela.setWarning(*ptr, "Uso de variavel nao inicializada!");
+            }
             ptr->usado = true;
         }
+
         lstExp.clear();
         lstExpType.clear();
         lstOperators.clear();
+
         break;
     case 20:
+
+        //std::cout << "\nAssembly: \n" << assembly;
+
         Tabela.setUnusedWarning();
         ResetaTabela();
         break;
@@ -306,58 +362,98 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
             ptrSim->usado = true;
             if( ptrSim->inicializado == false )
             {
-                Tabela.setUsingUndefinedWarning(*ptrSim);
+                Tabela.setWarning(*ptrSim);
             }
+            Tabela.gera_cod("LD", token->getLexeme());
+            Tabela.gera_cod("STO", "$out_port");
         }
         else
         {
-            Tabela.setUnusedWarning();
             throw SemanticError("Tentativa de leitura de variavel inexistente.", token->getPosition());
         }
-
         break;
-    case 22:
 
+    case 22:
+        ptrSim = Tabela.Find( stackEscopo, token->getLexeme() );
+
+        if( ptrSim != nullptr )
+        {
+            ptrSim->inicializado = true;
+            Tabela.gera_cod("LD", "$in_port");
+            Tabela.gera_cod("STO", ptrSim->id);
+        }
+        else
+        {
+            throw SemanticError("Entrada de dados em variavel inexistente.", token->getPosition());
+        }
         break;
 
         // Valores
     case 31:
         lstExpType.push_back(0); // Int
+        par.first = token->getLexeme();
+        par.second = false;
+        lstExpValor.push_back(par);
         break;
     case 32:
         lstExpType.push_back(1); // Float
+        par.first = token->getLexeme();
+        par.second = false;
+        lstExpValor.push_back(par);
         break;
     case 33:
         //lstExpType.push_back(3); // Double
+        //lstExpValor.push_back(token->getLexeme());
         break;
     case 34:
         lstExpType.push_back(2); // Char
+        par.first = token->getLexeme();
+        par.second = false;
+        lstExpValor.push_back(par);
         break;
     case 35:
         lstExpType.push_back(3); // String
+        par.first = token->getLexeme();
+        par.second = false;
+        lstExpValor.push_back(par);
         break;
     case 36:
         lstExpType.push_back(4); // Boolean
+        par.first = token->getLexeme();
+        par.second = false;
+        lstExpValor.push_back(par);
         break;
 
         // Peso das Expressões
     case 40:
-        lstOperators.push_back(0); // Mais ( + )
+        intPar.first = 0;
+        intPar.second = 0;
+        lstOperators.push_back(intPar); // Mais ( + )
         break;
     case 41:
-        lstOperators.push_back(1); // Menos ( - )
+        intPar.first = 1;
+        intPar.second = 0;
+        lstOperators.push_back(intPar); // Menos ( - )
         break;
     case 42:
-        lstOperators.push_back(2); // Vezes ( * )
+        intPar.first = 2;
+        intPar.second = 1;
+        lstOperators.push_back(intPar); // Vezes ( * )
         break;
     case 43:
-        lstOperators.push_back(3); // Divisão ( / )
+        intPar.first = 3;
+        intPar.second = 1;
+        lstOperators.push_back(intPar); // Divisão ( / )
         break;
     case 44:
-        lstOperators.push_back(4); // MOD ( % )
+        intPar.first = 4;
+        intPar.second = 1;
+        lstOperators.push_back(intPar); // MOD ( % )
         break;
     case 45:
-        lstOperators.push_back(5); // Relacionais ( >, <,  <=, >=, ==, != )
+        intPar.first = 5;
+        intPar.second = 2;
+        lstOperators.push_back(intPar); // Relacionais ( >, <,  <=, >=, ==, != )
         break;
     case 46:
         // Negate
@@ -383,50 +479,133 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
 
         pos = 0;
         std::cout << "\nLista de operadores: ";
-        for(int i : lstOperators)
+        for(pair<int, int> i : lstOperators)
         {
-            std::cout << "\nOperador: " << pos << " Operador: " << i << "\n";
+            std::cout << "\nOperador: " << pos << " Operador: " << i.first << "\n";
             pos ++;
         }
 
+        if(lstExpType.size() == 1 ) // SE FOR SO UM NUMERO
+        {
+            par = lstExpValor.front();
+            if( par.second )
+            {
+                Tabela.gera_cod("LD", par.first);
+            }
+            else
+            {
+                Tabela.gera_cod("LDI", par.first);
+            }
+
+        }
 
         while(lstOperators.size() != 0)
         {
-            std::cout << "\nSIZE = " << lstOperators.size();
-            if(lstOperators.size() == 1)
+            std::cout << "SIZE = " << lstOperators.size() << "\n";
+            if(lstOperators.size() == 1) // ULTIMA ITERACAO
             {
                 value_1 = lstExpType.front();
                 value_2 = lstExpType.back();
-                max = lstOperators.front();
-                return_type = semanticTable.resultType(value_1, value_2, max);
+                intPar = lstOperators.front();
+                return_type = semanticTable.resultType(value_1, value_2, intPar.first);
                 lstOperators.clear();
                 lstExpType.clear();
                 if(return_type == -1)
                 {
                     throw SemanticError("Erro na expressao, tipos invalidos.", token->getPosition());
                 }
+
+                if(firstVar)
+                {
+                    par = lstExpValor.front();
+                    if(par.second)
+                    {
+                        Tabela.gera_cod("LD", par.first);
+                    }
+                    else
+                    {
+                        Tabela.gera_cod("LDI", par.first);
+                    }
+
+                    par = lstExpValor.back();
+
+                    if( intPar.first == 0 ) // ADICAO
+                    {
+                        if(par.second) // VARIAVEL?
+                        {
+                            Tabela.gera_cod("ADD", par.first); // SIM
+                        }
+                        else
+                        {
+                            Tabela.gera_cod("ADDI", par.first); // NAO
+                        }
+                    }
+                    else if( intPar.first == 1) // SUBTRACAO
+                    {
+                        if(par.second) // VARIAVEL?
+                        {
+                            Tabela.gera_cod("SUB", par.first); // SIM
+                        }
+                        else
+                        {
+                            Tabela.gera_cod("SUBI", par.first); // NAO
+                        }
+                    }
+
+                    firstVar = false;
+                }
+                else
+                {
+                    if( intPar.first == 0 ) // ADICAO
+                    {
+                        par = lstExpValor.front();
+                        if(par.second) // VARIAVEL?
+                        {
+                                Tabela.gera_cod("ADD", par.first); // SIM
+                        }
+                        else
+                        {
+                                Tabela.gera_cod("ADDI", par.first); // NAO
+                        }
+                    }
+                    else if( intPar.first == 1) // SUBTRACAO
+                    {
+                        par = lstExpValor.front();
+                        if(par.second) // VARIAVEL?
+                        {
+                                Tabela.gera_cod("SUB", par.first); // SIM
+                        }
+                        else
+                        {
+                                Tabela.gera_cod("SUBI", par.first); // NAO
+                        }
+                    }
+                }
+
+                lstExpValor.clear();
                 lstExpType.push_back(return_type);
             }
             if(lstOperators.size() > 1)
             {
                 // Pega a expressão com maior prioridade
-                max = 0;
-                for ( int i : lstOperators )
+                intPar.first = -1;
+                intPar.second = -1;
+                for ( pair<int, int> i : lstOperators )
                 {
-                    if( i > max )
-                        max = i;
+                    if( i.second > intPar.second )
+                        intPar = i;
                 }
                 // Pega a posição da primeira expressão com maior prioridade
                 pos = 0;
-                for( int i : lstOperators )
+                for( pair<int, int> i : lstOperators )
                 {
-                    if( max == i )
+                    if( intPar.second == i.second )
                         break;
                     pos++;
                 }
-                it = lstOperators.begin();
-                advance(it, pos);
-                lstOperators.erase(it);
+                it_par = lstOperators.begin();
+                advance(it_par, pos);
+                lstOperators.erase(it_par);
 
                 it = lstExpType.begin();
                 advance(it, pos);
@@ -434,22 +613,98 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
                 it = lstExpType.erase(it);
                 value_2 = *it; // Pega o proximo valor na lista de tipos
                 it = lstExpType.erase(it);
-                return_type = semanticTable.resultType(value_1, value_2, max); // Verifica a expressão ( valor_1, max (operador), valor_2 )
+                return_type = semanticTable.resultType(value_1, value_2, intPar.first); // Verifica a expressão ( valor_1, max (operador), valor_2 )
 
                 if(return_type == -1)
                 {
                     throw SemanticError("Erro na expressao, tipos invalidos.", token->getPosition());
                 }
 
+                // GERACAO DE CODIGO ( apos a validacao apenas )
+                it_val = lstExpValor.begin();
+                advance(it_val, pos);
+                par = *it_val;
+                it_val = lstExpValor.erase(it_val);
+
+                if(firstVar) // PRIMEIRA ITERACAO?
+                {
+                    if(par.second) // VARIAVEl?
+                    {
+                        Tabela.gera_cod("LD", par.first); // SIM
+                    }
+                    else
+                    {
+                        Tabela.gera_cod("LDI", par.first); // NAO
+                    }
+                    par = *it_val;
+
+                    if ( intPar.first == 0 ) // ADICAO
+                    {
+                        if(par.second) // VARIAVEL?
+                        {
+                                Tabela.gera_cod("ADD", par.first); // SIM
+                        }
+                        else
+                        {
+                                Tabela.gera_cod("ADDI", par.first); // NAO
+                        }
+                    }
+                    else if( intPar.first == 1) // SUBTRACAO
+                    {
+                        if(par.second) // VARIAVEL?
+                        {
+                                Tabela.gera_cod("SUB", par.first); // SIM
+                        }
+                        else
+                        {
+                                Tabela.gera_cod("SUBI", par.first); // NAO
+                        }
+                    }
+                    it_val = lstExpValor.erase(it_val);
+
+                    firstVar = false; // JA FOI
+                }
+                else // NAO EH A PRIMEIRA ITERACAO
+                {
+                    if ( intPar.first == 0 ) // ADICAO
+                    {
+                        if(par.second) // VARIAVEL?
+                        {
+                            Tabela.gera_cod("ADD", par.first); // SIM
+                        }
+                        else
+                        {
+                            Tabela.gera_cod("ADDI", par.first); // NAO
+                        }
+                    }
+                    else if( intPar.first == 1) // SUBTRACAO
+                    {
+                        if(par.second) // VARIAVEL?
+                        {
+                            Tabela.gera_cod("SUB", par.first); // SIM
+                        }
+                        else
+                        {
+                            Tabela.gera_cod("SUBI", par.first); // NAO
+                        }
+                    }
+                }
+
+
                 lstExpType.insert(it, return_type);
             }
         }
 
+        Tabela.gera_cod("STO", store);
+
         if( lstExpType.size() > 1 )
             std::cout << "DEU ALGO DE ERRADO, EXPRESSAO COM MAIS DE UM VALOR RESTANTE!";
         return_type = lstExpType.front();
-        lstExpType.clear();
         std::cout << "\nRetorno: " << return_type << "\n";
+
+        firstVar = true;
+        lstExpValor.clear();
+        lstExpType.clear();
         break;
     }
 }

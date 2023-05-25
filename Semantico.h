@@ -25,8 +25,6 @@ public:
 
     void DeclararTipo(std::string t);
 
-
-
 };
 
 class Warning{
@@ -40,6 +38,15 @@ class TabelaSimbolo
 public:
     list<Simbolo> lstSimbolos;
     list<Warning> lstWarning;
+    string assembly = "";
+
+    void gera_cod(string funcao, string valor)
+    {
+        assembly.append(funcao);
+        assembly.append(" ");
+        assembly.append(valor);
+        assembly.append("\n");
+    }
 
     void setUnusedWarning()
     {
@@ -58,7 +65,7 @@ public:
         }
     }
 
-    void setUsingUndefinedWarning(Simbolo sim, string error = "Variavel nao atribuiada utilizada")
+    void setWarning(Simbolo sim, string error = "Variavel nao atribuiada utilizada")
     {
         Warning war;
         war.error = error;
