@@ -32,6 +32,8 @@ private slots:
 
     void on_btnTabela_clicked();
 
+    void on_btnAssembly_clicked();
+
 private:
     Ui::Compiler *ui;
 };

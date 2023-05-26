@@ -326,26 +326,54 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
 
         break;
 
+    case 18:
+        if(return_type != 4)
+        {
+            throw SemanticError("Boolean esperado na expressao", token->getPosition());
+        }
+        break;
     case 19:
         for( Simbolo * ptr : lstExp )
         {
+            if(ptr->inicializado == false )
+            {
+                Tabela.setWarning(*ptr, "Uso de variavel nao inicializada!");
+            }
             ptr->usado = true;
         }
+
         lstExp.clear();
         lstExpType.clear();
         lstOperators.clear();
 
-        if(return_type != 4)
-        {
-            throw SemanticError("Boolean esperado na expressao do IF", token->getPosition());
-        }
         break;
     case 20:
-
-        //std::cout << "\nAssembly: \n" << assembly;
-
         Tabela.setUnusedWarning();
         ResetaTabela();
+
+        Tabela.data.clear();
+        Tabela.data.append(".data\n");
+        for (auto it = Tabela.lstSimbolos.rbegin(); it != Tabela.lstSimbolos.rend(); ++it) {
+            Simbolo sim = *it;
+            if(sim.vetor)
+            {
+                Tabela.data.append(sim.id);
+                Tabela.data.append(":");
+                for(int i = 0; i < sim.posVetor; i++)
+                {
+                    Tabela.data.append(" 0");
+                }
+                Tabela.data.append("\n");
+            }
+            else
+            {
+                Tabela.data.append(sim.id);
+                Tabela.data.append(": 0\n");
+            }
+        }
+
+        Tabela.data.append("\n.text\n");
+        Tabela.data.append(Tabela.assembly);
         break;
 
     case 21:
@@ -357,18 +385,28 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
             {
                 Tabela.setWarning(*ptrSim);
             }
+            Tabela.gera_cod("LD", token->getLexeme());
+            Tabela.gera_cod("STO", "$out_port");
         }
         else
         {
             throw SemanticError("Tentativa de leitura de variavel inexistente.", token->getPosition());
         }
-
-        Tabela.gera_cod("LD", token->getLexeme());
-        Tabela.gera_cod("STO", "$out_port");
-
         break;
-    case 22:
 
+    case 22:
+        ptrSim = Tabela.Find( stackEscopo, token->getLexeme() );
+
+        if( ptrSim != nullptr )
+        {
+            ptrSim->inicializado = true;
+            Tabela.gera_cod("LD", "$in_port");
+            Tabela.gera_cod("STO", ptrSim->id);
+        }
+        else
+        {
+            throw SemanticError("Entrada de dados em variavel inexistente.", token->getPosition());
+        }
         break;
 
         // Valores
@@ -678,16 +716,14 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
             }
         }
 
-        Tabela.gera_cod("STO", store);
-
         if( lstExpType.size() > 1 )
-            std::cout << "DEU ALGO DE ERRADO, EXPRESSAO COM MAIS DE UM VALOR RESTANTE!";
-        return_type = lstExpType.front();
-        std::cout << "\nRetorno: " << return_type << "\n";
+            throw SemanticError("Erro inexperado na expressao, mais de um valor no retorno", token->getPosition());
 
-        firstVar = true;
         lstExpValor.clear();
         lstExpType.clear();
+        return_type = lstExpType.front();
+        firstVar = true;
+        Tabela.gera_cod("STO", store);
         break;
     }
 }

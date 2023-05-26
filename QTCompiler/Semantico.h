@@ -39,6 +39,7 @@ public:
     list<Simbolo> lstSimbolos;
     list<Warning> lstWarning;
     string assembly = "";
+    string data;
 
     void gera_cod(string funcao, string valor)
     {

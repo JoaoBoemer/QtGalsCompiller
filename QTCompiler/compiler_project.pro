@@ -13,6 +13,7 @@ SOURCES += \
     Lexico.cpp \
     Semantico.cpp \
     Sintatico.cpp \
+    frmassembly.cpp \
     frmtabela.cpp \
     main.cpp \
     compiler.cpp
@@ -28,11 +29,13 @@ HEADERS += \
     SyntaticError.h \
     Token.h \
     compiler.h \
+    frmassembly.h \
     frmtabela.h \
     semantictable.h
 
 FORMS += \
     compiler.ui \
+    frmassembly.ui \
     frmtabela.ui
 
 # Default rules for deployment.

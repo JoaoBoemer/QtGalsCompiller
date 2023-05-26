@@ -1,6 +1,7 @@
 #include "compiler.h"
 #include "ui_compiler.h"
 #include "frmtabela.h"
+#include "frmassembly.h"
 
 #include <iostream>
 #include <fstream>
@@ -61,7 +62,7 @@ void Compiler::on_btnCompile_clicked()
         }
         ui->txtResult->setText(warning.c_str());
 
-        ui->txtResult->append(this->sem->Tabela.assembly.c_str());
+        //ui->txtResult->append(this->sem->Tabela.assembly.c_str());
 
         ui->txtResult->append("Compilou :D");
     }
@@ -97,8 +98,8 @@ void Compiler::on_btnCompile_clicked()
 
 void Compiler::on_btnSave_clicked()
 {
-    QString filePath = QFileDialog::getSaveFileName(this, tr("Salva il File"), "",
-                                                    tr("File di Testo (.txt);;C++ File (.cpp *.h)"));
+    QString filePath = QFileDialog::getSaveFileName(this, tr("Salvar"), "",
+                                                    tr("Bloco de notas(.txt);;C++ File (.cpp *.h)"));
 
     QFile writeFile(filePath);
     QString content = ui->txtCode->toPlainText();
@@ -147,5 +148,14 @@ void Compiler::on_btnTabela_clicked()
         return;
     frmTabela * tabela = new frmTabela(this->sem->Tabela.lstSimbolos, this);
     tabela->show();
+}
+
+
+void Compiler::on_btnAssembly_clicked()
+{
+    if(this->sem == nullptr)
+        return;
+    frmAssembly * frmassembly = new frmAssembly(this->sem->Tabela.data, this);
+    frmassembly->show();
 }
 
