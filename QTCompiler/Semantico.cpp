@@ -100,6 +100,8 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
 
             ptrSim = &Tabela.lstSimbolos.front();
             lastSimbol = &Tabela.lstSimbolos.front();
+
+            store = lastSimbol->id;
         }
         else
         {
@@ -718,6 +720,7 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
 
         if( lstExpType.size() > 1 )
             throw SemanticError("Erro inexperado na expressao, mais de um valor no retorno", token->getPosition());
+
 
         lstExpValor.clear();
         lstExpType.clear();
