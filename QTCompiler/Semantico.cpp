@@ -269,12 +269,23 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
         break;
 
     case 14: // GERACAO DE CODIGO ASSEMBLY - Saida de dados
+        if( ptrSim->vetor )
+        {
+            throw SemanticError("Tentativa de leitura de vetor.", token->getPosition());
+        }
+
         Tabela.gera_cod("LDI", token->getLexeme());
         Tabela.gera_cod("STO", "$out_port");
         break;
 
     case 15:
-
+        if( !ptrAtribuir->vetor )
+        {
+            throw SemanticError("Tentativa de leitura de vetor em outro tipo de variavel.", token->getPosition());
+        }
+        ptrAtribuir->usado = true;
+        Tabela.gera_cod("LDV", ptrAtribuir->id);
+        Tabela.gera_cod("STO", "$out_port");
         break;
 
     case 16:
@@ -383,6 +394,12 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
         if(ptrSim != nullptr)
         {
             ptrSim->usado = true;
+
+            if( ptrSim->vetor )
+            {
+                throw SemanticError("Tentativa de leitura de vetor", token->getPosition());
+            }
+
             if( ptrSim->inicializado == false )
             {
                 Tabela.setWarning(*ptrSim);
@@ -399,16 +416,60 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
     case 22:
         ptrSim = Tabela.Find( stackEscopo, token->getLexeme() );
 
+        if( ptrSim->vetor )
+        {
+            throw SemanticError("Tentativa de entrada de dados em Vetor", token->getPosition());
+        }
+
         if( ptrSim != nullptr )
         {
             ptrSim->inicializado = true;
-            Tabela.gera_cod("LD", "$in_port");
+            //Tabela.gera_cod("LD", "$in_port");
             Tabela.gera_cod("STO", ptrSim->id);
         }
         else
         {
             throw SemanticError("Entrada de dados em variavel inexistente.", token->getPosition());
         }
+        break;
+
+    case 23:
+
+        if( !ptrAtribuir->vetor )
+        {
+            throw SemanticError("Variavel nao e vetor", token->getPosition());
+        }
+
+        if( ( ptrAtribuir->posVetor - 1 ) < stoi(token->getLexeme()) )
+        {
+            throw SemanticError("Index out of bounds.", token->getPosition() );
+        }
+
+        Tabela.gera_cod("$indr", token->getLexeme());
+
+        break;
+
+    case 24:
+
+        ptrSim->inicializado = true;
+        Tabela.gera_cod("STOV", ptrSim->id);
+        /*
+        if( !ptrAtribuir->vetor )
+        {
+            throw SemanticError("Variavel nao e vetor", token->getPosition());
+        }
+
+        if( ( ptrAtribuir->posVetor - 1 ) < stoi(token->getLexeme()) )
+        {
+            throw SemanticError("Index out of bounds.", token->getPosition() );
+        }
+
+        Tabela.gera_cod("$indr", token->getLexeme());
+        */
+        break;
+
+    case 25:
+        Tabela.gera_cod("LD", "$in_port");
         break;
 
         // Valores
@@ -721,10 +782,9 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
         if( lstExpType.size() > 1 )
             throw SemanticError("Erro inexperado na expressao, mais de um valor no retorno", token->getPosition());
 
-
+        return_type = lstExpType.front();
         lstExpValor.clear();
         lstExpType.clear();
-        return_type = lstExpType.front();
         firstVar = true;
         Tabela.gera_cod("STO", store);
         break;
