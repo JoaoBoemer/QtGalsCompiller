@@ -90,7 +90,7 @@ extern int SPECIAL_CASES_VALUES[27];
 
 extern const char *SCANNER_ERROR[STATES_COUNT];
 
-const int FIRST_SEMANTIC_ACTION = 137;
+const int FIRST_SEMANTIC_ACTION = 138;
 
 const int SHIFT  = 0;
 const int REDUCE = 1;
@@ -99,10 +99,10 @@ const int ACCEPT = 3;
 const int GO_TO  = 4;
 const int ERROR  = 5;
 
-extern const int PARSER_TABLE[353][189][2];
+extern const int PARSER_TABLE[356][190][2];
 
 extern const int PRODUCTIONS[148][2];
 
-extern const char *PARSER_ERROR[353];
+extern const char *PARSER_ERROR[356];
 
 #endif
