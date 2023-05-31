@@ -234,7 +234,7 @@ CHAR_VALUE: '( {LETTER} | {NUMBER} | {UNDERSCORE} | {OTHERS} | {CHARACTER} ) '
 
 <termo> ::= ID #3 | INT_VALUE #31 | FLOAT_VALUE #32 | DOUBLE_VALUE #33 | CHAR_VALUE#34 | STRING_VALUE#35 | BOOLEAN_VALUE #36 | <vetor_exp>;// | <chamar_function>;
 
-<vetor_exp> ::= ID #3 ABRIR_COLCHETES <exp> FECHAR_COLCHETES;
+<vetor_exp> ::= ID ABRIR_COLCHETES #26 <exp> #51 #27 #28 FECHAR_COLCHETES;
 
 <lista_termo>::= <termo> | <lista_termo> VIRGULA <termo>;
 
@@ -269,8 +269,8 @@ CHAR_VALUE: '( {LETTER} | {NUMBER} | {UNDERSCORE} | {OTHERS} | {CHARACTER} ) '
 //<vetor_entrada> ::= ID #4 ABRIR_COLCHETES INT_VALUE #24 FECHAR_COLCHETES;
 
 <in_out>::= <cin>  PONTO_E_VIRGULA | <cout> PONTO_E_VIRGULA | <printf> | <scanf>;
-<cin>::= CIN RIGHTSHIFT #25 <vetor> #24 | CIN RIGHTSHIFT #25 ID #22 | CIN RIGHTSHIFT #25 <vetor> #24 <cin_mult> | CIN RIGHTSHIFT #25 ID #22 <cin_mult>;
-<cin_mult>::= RIGHTSHIFT #25 <vetor> #24 | RIGHTSHIFT #25 <vetor> #24 <cin_mult> | RIGHTSHIFT #25 ID #22 | RIGHTSHIFT #25 ID #22 <cin_mult>;
+<cin>::= CIN RIGHTSHIFT <vetor> #25 #24 | CIN RIGHTSHIFT ID #25 #22 | CIN RIGHTSHIFT <vetor> #25 #24 <cin_mult> | CIN RIGHTSHIFT ID #25 #22 <cin_mult>;
+<cin_mult>::= RIGHTSHIFT <vetor> #25 #24 | RIGHTSHIFT <vetor> #25 #24 <cin_mult> | RIGHTSHIFT ID #25 #22 | RIGHTSHIFT ID #25 #22 <cin_mult>;
 <cout>::= COUT LEFTSHIFT <saidas> |  COUT LEFTSHIFT <saidas> <cout_multi> ;
 <cout_multi>::=  LEFTSHIFT <saidas> |  LEFTSHIFT <saidas> <cout_multi>;
 <printf>::= PRINTF ABRIR_PARENTESES <lista_termo> FECHAR_PARENTESES PONTO_E_VIRGULA;
