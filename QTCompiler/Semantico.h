@@ -5,6 +5,7 @@
 #include "Token.h"
 #include "SemanticError.h"
 #include <list>
+#include <iostream>
 
 using namespace std;
 
@@ -80,12 +81,20 @@ public:
 
     void FreeTemp(string name)
     {
+        std::cout << "\nLIBERAR NOME : " << name << "\n";
         for( Temp t : temp )
         {
+
+            std::cout << t.name << "\nSERA SE LIBERA?\n";
             if(t.name == name)
             {
+                std::cout << t.name << "\nLIBEROU\n";
                 t.livre = true;
                 return;
+            }
+            else
+            {
+                std::cout << t.name << "\nNAO LIBEROU\n";
             }
         }
     }
