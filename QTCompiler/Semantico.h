@@ -49,23 +49,32 @@ public:
     string data;
     //list<pair<string, bool>> temp;
     list<Temp> temp;
-    int contador = 1;
+    int contador = 0;
 
-    string GetTemp()
+    Temp * GetTemp()
     {
-        for(Temp t : temp)
+        for(Temp& t : temp)
         {
-            if(t.livre)
-                return t.name;
+            if(t.livre){
+                return &t;
+            }
         }
+
         Temp t;
 
-        t.livre = false;
+        t.livre = true;
         t.name = "temp" + to_string(contador);
         temp.push_back(t);
+
         this->contador ++;
 
-        return t.name;
+        for(Temp& t : temp)
+        {
+            if(t.livre)
+                return &t;
+        }
+
+        return nullptr;
     }
 
     string GetLastTemp()
@@ -81,20 +90,12 @@ public:
 
     void FreeTemp(string name)
     {
-        std::cout << "\nLIBERAR NOME : " << name << "\n";
         for( Temp t : temp )
         {
-
-            std::cout << t.name << "\nSERA SE LIBERA?\n";
             if(t.name == name)
             {
-                std::cout << t.name << "\nLIBEROU\n";
                 t.livre = true;
                 return;
-            }
-            else
-            {
-                std::cout << t.name << "\nNAO LIBEROU\n";
             }
         }
     }

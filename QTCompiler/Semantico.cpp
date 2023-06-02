@@ -33,7 +33,9 @@ char oper;
 string store = "";
 string vector_load;
 string lastTemp;
-
+Temp * temporario;
+Temp * temporarioVetor;
+Temp * temporarioAux;
 void Simbolo::DeclararTipo(std::string t){
     tipo = t;
 }
@@ -507,16 +509,21 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
         lstExpType.push_back(return_type);
         break;
 
-    case 29:
-        lstExpTypeSave.clear();
-        lstOperatorsSave.clear();
-        break;
-
     case 30:
         vectorSave = true;
         flagOp = false;
+
         if(!firstVar)
-            Tabela.gera_cod("STO", Tabela.GetTemp());
+        {
+            temporarioAux = Tabela.GetTemp();
+            temporarioAux->livre = false;
+            Tabela.gera_cod("STO", temporarioAux->name);
+        }
+        else
+        {
+            //temporario = Tabela.GetTemp();
+            //temporario->livre = false;
+        }
 
         vector_load = token->getLexeme();
 
@@ -605,39 +612,23 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
         return_type = 0;
 
         pos = 0;
-        std::cout << "Lista de tipos: ";
+        std::cout << "Lista de tipos: \n";
         for(int i : lstExpType)
         {
-            std::cout << "\nPosicao: " << pos << " Tipo: " << i << "\n";
+            std::cout << "Posicao: " << pos << " Tipo: " << i << "\n";
             pos ++;
         }
 
         pos = 0;
-        std::cout << "\nLista de operadores: ";
+        std::cout << "Lista de operadores: \n";
         for(pair<int, int> i : lstOperators)
         {
-            std::cout << "\nOperador: " << pos << " Operador: " << i.first << "\n";
+            std::cout << "Operador: " << pos << " Operador: " << i.first << "\n";
             pos ++;
         }
 
-        /*
-        if(lstExpType.size() == 1 ) // SE FOR SO UM NUMERO
-        {
-            par = lstExpValor.front();
-            if( par.second )
-            {
-                Tabela.gera_cod("LD", par.first);
-            }
-            else
-            {
-                Tabela.gera_cod("LDI", par.first);
-            }
-        }
-        */
-
         while(lstOperators.size() != 0)
         {
-            std::cout << "SIZE = " << lstOperators.size() << "\n";
             if(lstOperators.size() == 1) // ULTIMA ITERACAO
             {
                 value_1 = lstExpType.front();
@@ -650,79 +641,7 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
                 {
                     throw SemanticError("Erro na expressao, tipos invalidos.", token->getPosition());
                 }
-                /*
-                if(firstVar)
-                {
-                    par = lstExpValor.front();
-                    if(par.second)
-                    {
-                        Tabela.gera_cod("LD", par.first);
-                    }
-                    else
-                    {
-                        Tabela.gera_cod("LDI", par.first);
-                    }
 
-                    par = lstExpValor.back();
-
-                    if( intPar.first == 0 ) // ADICAO
-                    {
-                        if(par.second) // VARIAVEL?
-                        {
-                            Tabela.gera_cod("ADD", par.first); // SIM
-                        }
-                        else
-                        {
-                            Tabela.gera_cod("ADDI", par.first); // NAO
-                        }
-                    }
-                    else if( intPar.first == 1) // SUBTRACAO
-                    {
-                        if(par.second) // VARIAVEL?
-                        {
-                            Tabela.gera_cod("SUB", par.first); // SIM
-                        }
-                        else
-                        {
-                            Tabela.gera_cod("SUBI", par.first); // NAO
-                        }
-                    }
-
-                    firstVar = false;
-                }
-                else
-                {
-                    if( intPar.first == 0 ) // ADICAO
-                    {
-                        par = lstExpValor.front();
-                        if(par.second) // VARIAVEL?
-                        {
-                                Tabela.gera_cod("ADD", par.first); // SIM
-                        }
-                        else
-                        {
-                                Tabela.gera_cod("ADDI", par.first); // NAO
-                        }
-                    }
-                    else if( intPar.first == 1) // SUBTRACAO
-                    {
-                        par = lstExpValor.front();
-                        if(par.second) // VARIAVEL?
-                        {
-                                Tabela.gera_cod("SUB", par.first); // SIM
-                        }
-                        else
-                        {
-                                Tabela.gera_cod("SUBI", par.first); // NAO
-                        }
-                    }
-                }
-
-
-                lstExpValor.clear();
-
-                lstExpType.push_back(return_type);
-                */
             }
             if(lstOperators.size() > 1)
             {
@@ -760,85 +679,12 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
                 }
 
                 lstExpType.insert(it, return_type);
-
-                /*
-                // GERACAO DE CODIGO ( apos a validacao apenas )
-                it_val = lstExpValor.begin();
-                advance(it_val, pos);
-                par = *it_val;
-                it_val = lstExpValor.erase(it_val);
-
-                if(firstVar) // PRIMEIRA ITERACAO?
-                {
-                    if(par.second) // VARIAVEl?
-                    {
-                        Tabela.gera_cod("LD", par.first); // SIM
-                    }
-                    else
-                    {
-                        Tabela.gera_cod("LDI", par.first); // NAO
-                    }
-                    par = *it_val;
-
-                    if ( intPar.first == 0 ) // ADICAO
-                    {
-                        if(par.second) // VARIAVEL?
-                        {
-                                Tabela.gera_cod("ADD", par.first); // SIM
-                        }
-                        else
-                        {
-                                Tabela.gera_cod("ADDI", par.first); // NAO
-                        }
-                    }
-                    else if( intPar.first == 1) // SUBTRACAO
-                    {
-                        if(par.second) // VARIAVEL?
-                        {
-                                Tabela.gera_cod("SUB", par.first); // SIM
-                        }
-                        else
-                        {
-                                Tabela.gera_cod("SUBI", par.first); // NAO
-                        }
-                    }
-                    it_val = lstExpValor.erase(it_val);
-
-                    firstVar = false; // JA FOI
-                }
-                else // NAO EH A PRIMEIRA ITERACAO
-                {
-                    if ( intPar.first == 0 ) // ADICAO
-                    {
-                        if(par.second) // VARIAVEL?
-                        {
-                            Tabela.gera_cod("ADD", par.first); // SIM
-                        }
-                        else
-                        {
-                            Tabela.gera_cod("ADDI", par.first); // NAO
-                        }
-                    }
-                    else if( intPar.first == 1) // SUBTRACAO
-                    {
-                        if(par.second) // VARIAVEL?
-                        {
-                            Tabela.gera_cod("SUB", par.first); // SIM
-                        }
-                        else
-                        {
-                            Tabela.gera_cod("SUBI", par.first); // NAO
-                        }
-                    }
-                }
-                */
             }
         }
 
         if( lstExpType.size() > 1 )
             throw SemanticError("Erro inexperado na expressao, mais de um valor no retorno", token->getPosition());
 
-        return_type = lstExpType.front();
         lstExpType.clear();
         break;
 
@@ -846,23 +692,26 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
         firstVar = true;
         if(vectorExp)
         {
-            Tabela.gera_cod("LD", "temp0");
+            temporario = Tabela.GetTemp();
+            Tabela.gera_cod("STO", temporario->name);
+            Tabela.gera_cod("LD", temporarioVetor->name);
             Tabela.gera_cod("STO", "$indr");
-            /*
-            for( Temp t : Tabela.temp )
-            {
-                Tabela.gera_cod("LD", t.name);
-
-            }
-            */
-            Tabela.gera_cod("LD", "temp1");
+            Tabela.gera_cod("LD", temporario->name);
             Tabela.gera_cod("STOV", store);
         }
+        else
+        {
+            Tabela.gera_cod("STO", store);
+        }
+        temporarioVetor->livre = true;
+
         vectorExp = false;
         break;
 
     case 53:
-        Tabela.gera_cod("STO", "temp0"); // expressao da esquerda
+        temporarioVetor = Tabela.GetTemp();
+        Tabela.gera_cod("STO", temporarioVetor->name); // expressao da esquerda
+        temporarioVetor->livre = false;
         break;
 
     case 54:
@@ -871,17 +720,19 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
         Tabela.gera_cod("LDV", vector_load);
         if( !firstVar )
         {
-            lastTemp = Tabela.GetLastTemp();
-            Tabela.gera_cod("STO", Tabela.GetTemp());
-            Tabela.gera_cod("LD", lastTemp);
-            lastTemp = Tabela.GetLastTemp();
+            temporario = Tabela.GetTemp();
+            Tabela.gera_cod("STO", temporario->name);
+            Tabela.gera_cod("LD", temporarioAux->name);
             if(oper == '+')
-                Tabela.gera_cod("ADD", lastTemp);
+            {
+                Tabela.gera_cod("ADD", temporario->name);
+            }
             if(oper == '-')
-                Tabela.gera_cod("SUB", lastTemp);
-            Tabela.gera_cod("FREELASTTEMP", lastTemp);
-            Tabela.FreeTemp(lastTemp);
-            Tabela.gera_cod("FREELASTTEMP", "AA");
+            {
+                Tabela.gera_cod("SUB", temporario->name);
+            }
+            temporario->livre = true;
+            temporarioAux->livre = true;
         }
         firstVar = false;
         break;
