@@ -47,7 +47,6 @@ public:
     list<Warning> lstWarning;
     string assembly = "";
     string data;
-    //list<pair<string, bool>> temp;
     list<Temp> temp;
     int contador = 0;
 
@@ -74,30 +73,8 @@ public:
                 return &t;
         }
 
+        gera_cod("Error:", "nullptr returned.");
         return nullptr;
-    }
-
-    string GetLastTemp()
-    {
-        string save = "Erro no save";
-        for(Temp t : temp)
-        {
-            if(!t.livre)
-                save = t.name;
-        }
-        return save;
-    }
-
-    void FreeTemp(string name)
-    {
-        for( Temp t : temp )
-        {
-            if(t.name == name)
-            {
-                t.livre = true;
-                return;
-            }
-        }
     }
 
     void gera_cod(string funcao, string valor)
