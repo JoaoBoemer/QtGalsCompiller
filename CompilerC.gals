@@ -24,7 +24,6 @@ BOOLEAN_VALUE: (true|false)
 
 ID: {LETTER} ( {LETTER} | {NUMBER} | {UNDERSCORE} )*
 
-
 /// PALAVRAS RESERVADAS
 USING = ID : "using"
 CONST = ID : "const"
@@ -235,7 +234,7 @@ CHAR_VALUE: '( {LETTER} | {NUMBER} | {UNDERSCORE} | {OTHERS} | {CHARACTER} ) '
 
 <termo> ::= ID #3 | INT_VALUE #31 | FLOAT_VALUE #32 | DOUBLE_VALUE #33 | CHAR_VALUE#34 | STRING_VALUE#35 | BOOLEAN_VALUE #36 | <vetor_exp>;// | <chamar_function>;
 
-<vector_atribuir> ::= ID #4 #26 ABRIR_COLCHETES #27 <exp> #51 #53 #29 FECHAR_COLCHETES;
+<vector_atribuir> ::= ID #4 #26 ABRIR_COLCHETES <exp> #51 #53 FECHAR_COLCHETES;
 <vetor_exp> ::= ID #4 #30 ABRIR_COLCHETES #27 <exp> #51 #54 #28 FECHAR_COLCHETES;
 
 <lista_termo>::= <termo> | <lista_termo> VIRGULA <termo>;
