@@ -145,7 +145,7 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
                         Tabela.gera_cod ("SUB", token->getLexeme());
                     flagOp = false;
                 }
-
+                firstVar = false;
             }
             else
             {
@@ -282,18 +282,11 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
                 }
                 temp.pop();
             }
-            //Tabela.setUnusedWarning();
             ResetaTabela();
             throw SemanticError("Funcao inexistene no escopo. ", token->getPosition());
             break;
 
         case 14: // GERACAO DE CODIGO ASSEMBLY - Saida de dados
-            if( ptrSim->vetor )
-            {
-                ResetaTabela();
-                throw SemanticError("Tentativa de leitura de vetor.", token->getPosition());
-            }
-
             Tabela.gera_cod("LDI", token->getLexeme());
             Tabela.gera_cod("STO", "$out_port");
             break;
@@ -515,6 +508,7 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
 
             // Valores
         case 31:
+            firstVar = false;
             lstExpType.push_back(0); // Int
             if (!flagOp)
             {
@@ -530,18 +524,23 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
             }
             break;
         case 32:
+            firstVar = false;
             lstExpType.push_back(1); // Float
             break;
         case 33:
+            firstVar = false;
             //lstExpType.push_back(3); // Double
             break;
         case 34:
+            firstVar = false;
             lstExpType.push_back(2); // Char
             break;
         case 35:
+            firstVar = false;
             lstExpType.push_back(3); // String
             break;
         case 36:
+            firstVar = false;
             lstExpType.push_back(4); // Boolean
             break;
 
@@ -672,7 +671,7 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
                 ResetaTabela();
                 throw SemanticError("Erro inexperado na expressao, mais de um valor no retorno", token->getPosition());
             }
-
+            firstVar = true;
             lstExpType.clear();
             break;
 
