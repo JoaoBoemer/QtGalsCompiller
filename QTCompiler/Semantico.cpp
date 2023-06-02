@@ -371,6 +371,13 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
 
             Tabela.data.clear();
             Tabela.data.append(".data\n");
+
+            for(auto t : Tabela.temp )
+            {
+                Tabela.data.append(t.name);
+                Tabela.data.append(" : 0\n");
+            }
+
             for (auto it = Tabela.lstSimbolos.rbegin(); it != Tabela.lstSimbolos.rend(); ++it)
             {
                 Simbolo sim = *it;
@@ -380,8 +387,10 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
                     Tabela.data.append(":");
                     for(int i = 0; i < sim.posVetor; i++)
                     {
-                        Tabela.data.append(" 0");
+                        Tabela.data.append(" 0,");
                     }
+                    Tabela.data = Tabela.data.substr(0, Tabela.data.size()-1);
+                    //Tabela.data.erase(Tabela.data.back());
                     Tabela.data.append("\n");
                 }
                 else
