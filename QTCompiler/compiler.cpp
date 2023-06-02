@@ -102,7 +102,7 @@ void Compiler::on_btnCompile_clicked()
 void Compiler::on_btnSave_clicked()
 {
     QString filePath = QFileDialog::getSaveFileName(this, tr("Salvar"), "",
-                                                    tr("Bloco de notas(.txt);;C++ File (.cpp *.h)"));
+                                                    tr("Bloco de notas(*.txt);;C++ File (*.cpp *.h)"));
 
     QFile writeFile(filePath);
     QString content = ui->txtCode->toPlainText();

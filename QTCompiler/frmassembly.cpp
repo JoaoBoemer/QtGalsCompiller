@@ -3,6 +3,7 @@
 #include <iostream>
 #include <qfile.h>
 #include <qfiledialog.h>
+#include "qtextstream.h"
 
 frmAssembly::frmAssembly(QWidget *parent) :
     QDialog(parent),
@@ -34,8 +35,7 @@ void frmAssembly::on_btnClose_clicked()
 void frmAssembly::on_btnSave_clicked()
 {
     QString filePath = QFileDialog::getSaveFileName(this, tr("Salvar assembly"), "",
-                                                    tr("Assembly (.asm);;"));
-
+                                                    tr("Assembly(*.asm);;All Files(*.*)"));
     QFile writeFile(filePath);
     QString content = ui->txtAssembly->toPlainText();
     if(!writeFile.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text))
