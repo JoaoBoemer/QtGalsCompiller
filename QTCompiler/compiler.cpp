@@ -77,7 +77,10 @@ void Compiler::on_btnCompile_clicked()
     catch ( SemanticError e )
     {
         if(this->sem != nullptr)
+        {
             this->sem->Tabela.setUnusedWarning();
+        }
+
         for(Warning war : this->sem->Tabela.lstWarning)
         {
             warning.append("Warning: ");
