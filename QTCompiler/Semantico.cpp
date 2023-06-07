@@ -10,6 +10,7 @@ using namespace std;
 SemanticTable semanticTable;
 Simbolo simbolo;
 stack<int> stackEscopo;
+
 int escopo = 0;
 Simbolo * ptrSim;
 Simbolo * lastSimbol;
@@ -30,6 +31,12 @@ bool firstVar = true;
 bool flagOp = false;
 
 char oper;
+string operl;
+stack<string> stackRot;
+string rotIf;
+string rotFim;
+int contIf;
+
 string store;
 string vector_load;
 string lastTemp;
@@ -40,11 +47,22 @@ void Simbolo::DeclararTipo(std::string t){
     tipo = t;
 }
 
+string newRotulo()
+{
+    contIf ++;
+    string rot = "ROT" + to_string(contIf);
+    return rot;
+}
+
 void ResetaTabela()
 {
     while(!stackEscopo.empty())
     {
         stackEscopo.pop();
+    }
+    while(!stackRot.empty())
+    {
+        stackRot.pop();
     }
     escopo = 0;
     simbolo.vetor = false;
@@ -584,15 +602,19 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
             lstOperators.push_back(intPar); // MOD ( % )
             break;
         case 45:
+            operl = token->getLexeme();
+            Tabela.gera_cod("STO", "TEMP_ESQ");
             intPar.first = 5;
             intPar.second = 2;
             lstOperators.push_back(intPar); // Relacionais ( >, <,  <=, >=, ==, != )
             break;
         case 46:
-            // Negate
-            //lstOperators.push_back(6);
+            Tabela.gera_cod("STO", "TEMP_DIR");
+            Tabela.gera_cod("LD", "TEMP_ESQ");
+            Tabela.gera_cod("SUB", "TEMP_DIR");
             break;
         case 47:
+
             //ponteiro para lista
             // Parenteses
             break;
@@ -680,7 +702,6 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
                 ResetaTabela();
                 throw SemanticError("Erro inexperado na expressao, mais de um valor no retorno", token->getPosition());
             }
-            firstVar = true;
             lstExpType.clear();
             break;
 
@@ -749,5 +770,57 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
             }
             firstVar = false;
             break;
+
+    case 55:
+
+        rotIf = newRotulo();
+        stackRot.push(rotIf);
+
+        if(operl == ">")
+        {
+            Tabela.gera_cod("BLE", rotIf);
+        }
+        if(operl == "<")
+        {
+            Tabela.gera_cod("BGE", rotIf);
+        }
+        if(operl == "==")
+        {
+            Tabela.gera_cod("BNE", rotIf);
+        }
+        if(operl == "!=")
+        {
+            Tabela.gera_cod("BEQ", rotIf);
+        }
+        if(operl == ">=")
+        {
+            Tabela.gera_cod("BLT", rotIf);
+        }
+        if(operl == "<=")
+        {
+            Tabela.gera_cod("BGT", rotIf);
+        }
+
+        break;
+
+    case 56:
+        rotIf = stackRot.top();
+        stackRot.pop();
+        Tabela.gera_cod(rotIf + ":", " ");
+        break;
+
+    case 57:
+        if(stackRot.empty())
+        {
+            throw SemanticError("Erro no else ", token->getPosition());
+        }
+        rotIf = stackRot.top();
+        stackRot.pop();
+        //rotIf = pop ();
+        rotFim = newRotulo();
+        Tabela.gera_cod("JMP", rotFim);
+        stackRot.push(rotFim);
+        Tabela.gera_cod(rotIf + ":", " ");
+        break;
         }
 }
