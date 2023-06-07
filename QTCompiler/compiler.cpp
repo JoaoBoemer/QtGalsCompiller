@@ -95,6 +95,7 @@ void Compiler::on_btnCompile_clicked()
 
         ui->txtResult->append(e.getMessage());
     }
+    Compiler::on_btnAssembly_clicked();
 
 }
 
