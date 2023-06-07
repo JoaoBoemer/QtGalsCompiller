@@ -220,17 +220,17 @@ CHAR_VALUE: '( {LETTER} | {NUMBER} | {UNDERSCORE} | {OTHERS} | {CHARACTER} ) '
 <atribuicao>::= ID #5 <op_arit_baixa> ATRIBUICAO <exp>; // | ID <op_arit_alta> ATRIBUICAO<exp> ;
 
 //<exp>  ::= <exp> ATRIBUICAO <exp0> | <exp0>;
-<exp> ::= <exp> OR #45 <exp1> | <exp1>;
-<exp1> ::= <exp1> AND #45 <exp2> | <exp2>;
+<exp> ::= <exp> OR <exp1> | <exp1>;
+<exp1> ::= <exp1> AND <exp2> | <exp2>;
 <exp2> ::= <exp2> BITWISE_OR <exp3> | <exp3>;
 <exp3> ::= <exp3> BITWISE_XOR <exp4> | <exp4>;
 <exp4> ::= <exp4> BITWISE_AND <exp5> | <exp5>;
-<exp5> ::= <exp5> <op_rel> #45 <exp6> | <exp6>;
+<exp5> ::= <exp5> <op_rel> #45 <exp6> #46 | <exp6>;
 <exp6> ::= <exp6> <op_bitwise> <exp7> | <exp7>;
 <exp7> ::= <exp7> <op_arit_baixa> <exp8> | <exp8>;
 <exp8> ::= <exp8> <op_arit_alta> <exp9> | <exp9> ;
-<exp9> ::= <op_neg> #46 <exp10> | <exp10> ;
-<exp10> ::= <termo> | ABRIR_PARENTESES #47 <exp> FECHAR_PARENTESES;
+<exp9> ::= <op_neg> <exp10> | <exp10> ;
+<exp10> ::= <termo> | ABRIR_PARENTESES <exp> FECHAR_PARENTESES;
 
 <termo> ::= ID #3 | INT_VALUE #31 | FLOAT_VALUE #32 | DOUBLE_VALUE #33 | CHAR_VALUE#34 | STRING_VALUE#35 | BOOLEAN_VALUE #36 | <vetor_exp>;// | <chamar_function>;
 
@@ -257,9 +257,10 @@ CHAR_VALUE: '( {LETTER} | {NUMBER} | {UNDERSCORE} | {OTHERS} | {CHARACTER} ) '
 	
 <condicao_for>::= <declarar_var> <exp> #51 #52 #19 #18 PONTO_E_VIRGULA <atribuicao_variavel> | <atribuicao_variavel> PONTO_E_VIRGULA <exp> #51 #52 #19 #18 PONTO_E_VIRGULA <atribuicao_variavel>;
 
-<declarar_desvio>::= <if> | <if_else>;
-<if>::= IF ABRIR_PARENTESES <exp> #51 #52 #19 #18 FECHAR_PARENTESES <escopo>;
-<if_else>::= <if> ELSE <escopo> | <if> ELSE<declarar_desvio>;
+<declarar_desvio>::= <if> | <if_else> ;
+//<if>::= IF ABRIR_PARENTESES <exp> #51 #19 #18 FECHAR_PARENTESES <escopo>;
+<if>::= IF ABRIR_PARENTESES <exp> #51 #19 #18 FECHAR_PARENTESES ABRIR_CHAVES #10 #55 <lista_cmd> FECHAR_CHAVES #11;
+<if_else>::= <if> ELSE #57 ABRIR_CHAVES #10 #55 <lista_cmd> FECHAR_CHAVES #11 #56 | <if> ELSE #57 <declarar_desvio> #56;
 
 <saidas> ::= STRING_VALUE #14 | ID #21 | CHAR #14 | <vetor_io> #15;
 
