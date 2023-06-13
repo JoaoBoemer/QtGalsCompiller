@@ -64,6 +64,7 @@ void ResetaTabela()
     {
         stackRot.pop();
     }
+    contIf = 0;
     escopo = 0;
     simbolo.vetor = false;
     simbolo.parametro = false;
@@ -382,6 +383,10 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
             }
             break;
         case 19:
+            for ( Simbolo * x : lstExp)
+            {
+                x->usado = true;
+            }
             break;
         case 20:
             Tabela.setUnusedWarning();
@@ -822,5 +827,53 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
         stackRot.push(rotFim);
         Tabela.gera_cod(rotIf + ":", " ");
         break;
+
+    case 58:
+        rotIf = newRotulo();
+        stackRot.push(rotIf);
+        Tabela.gera_cod(rotIf + ":", "");
+        break;
+
+    case 59:
+        rotFim = newRotulo();
+        stackRot.push(rotFim);
+
+        if(operl == ">")
+        {
+            Tabela.gera_cod("BLE", rotFim);
+        }
+        if(operl == "<")
+        {
+            Tabela.gera_cod("BGE", rotFim);
+        }
+        if(operl == "==")
+        {
+            Tabela.gera_cod("BNE", rotFim);
+        }
+        if(operl == "!=")
+        {
+            Tabela.gera_cod("BEQ", rotFim);
+        }
+        if(operl == ">=")
+        {
+            Tabela.gera_cod("BLT", rotFim);
+        }
+        if(operl == "<=")
+        {
+            Tabela.gera_cod("BGT", rotFim);
+        }
+
+        break;
+
+    case 60:
+        rotIf = stackRot.top();
+        stackRot.pop();
+        rotFim= stackRot.top();
+        stackRot.pop();
+        Tabela.gera_cod("JMP", rotFim);
+        Tabela.gera_cod(rotIf + ":", "");
+        break;
+
+
         }
 }
