@@ -254,7 +254,7 @@ CHAR_VALUE: '( {LETTER} | {NUMBER} | {UNDERSCORE} | {OTHERS} | {CHARACTER} ) '
 
 <escopo>::= ABRIR_CHAVES #10 <lista_cmd> FECHAR_CHAVES #11;
 <lacos_repeticao>::= <laco_while> | <laco_do_while> | <laco_for>;
-<laco_while>::= WHILE ABRIR_PARENTESES <exp> #51 #52 #18 FECHAR_PARENTESES <escopo>;
+<laco_while>::= WHILE #58 ABRIR_PARENTESES <exp> #51 #18 #19 FECHAR_PARENTESES #59 <escopo> #60;
 <laco_do_while>::= DO  <escopo> WHILE ABRIR_PARENTESES <exp> #51 #52 #18 FECHAR_PARENTESES PONTO_E_VIRGULA;
 <laco_for>::= FOR ABRIR_PARENTESES <condicao_for> FECHAR_PARENTESES <escopo>;
 	
@@ -264,9 +264,9 @@ CHAR_VALUE: '( {LETTER} | {NUMBER} | {UNDERSCORE} | {OTHERS} | {CHARACTER} ) '
 //<if>::= IF ABRIR_PARENTESES <exp> #51 #18 FECHAR_PARENTESES ABRIR_CHAVES #10 #55 <lista_cmd> FECHAR_CHAVES #11 #56;
 //<if_else>::= <if_exclusivo> ELSE #57 ABRIR_CHAVES #10 #55 <lista_cmd> FECHAR_CHAVES #11 #56 | <if_exclusivo> ELSE #57 <declarar_desvio>;
 
-<if_lista> ::= <if> #56 | <if> ELSE <if_lista> | <if> <else>;
-<if> ::= IF ABRIR_PARENTESES <exp> #51 #18 FECHAR_PARENTESES ABRIR_CHAVES #10 #55 <lista_cmd> FECHAR_CHAVES;
-<else> ::= ELSE #57 ABRIR_CHAVES <lista_cmd> FECHAR_CHAVES #56;
+<if_lista> ::= <if> #56 | <if> ELSE #57 <if_lista> | <if> <else>;
+<if> ::= IF ABRIR_PARENTESES <exp> #51 #18 #19 FECHAR_PARENTESES ABRIR_CHAVES #10 #55 <lista_cmd> FECHAR_CHAVES #11;
+<else> ::= ELSE #57 ABRIR_CHAVES #10 <lista_cmd> FECHAR_CHAVES #11 #56;
 
 <saidas> ::= STRING_VALUE #14 | ID #21 | CHAR #14 | <vetor_io> #15;
 
