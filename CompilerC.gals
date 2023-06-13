@@ -149,7 +149,9 @@ CHAR_VALUE: '( {LETTER} | {NUMBER} | {UNDERSCORE} | {OTHERS} | {CHARACTER} ) '
 <mais_menos_um>
 <sub_um>
 <soma_um>
+<if_lista>
 <if>
+<else>
 <if_else>
 <in_out>
 <cin>
@@ -196,7 +198,8 @@ CHAR_VALUE: '( {LETTER} | {NUMBER} | {UNDERSCORE} | {OTHERS} | {CHARACTER} ) '
 
 <lista_cmd> ::= <lista_cmd> <cmd> | <cmd>; //<return>;
 
-<cmd>::= <declarar_var> |<atribuicao_variavel> PONTO_E_VIRGULA |<declarar_function> <escopo> | <lacos_repeticao> | <declarar_desvio> | <escopo> | <in_out> | <chamar_function> #33 PONTO_E_VIRGULA | <return>;
+<cmd>::= <declarar_var> |<atribuicao_variavel> PONTO_E_VIRGULA |<declarar_function> <escopo> | <lacos_repeticao> | <if_lista>//<declarar_desvio>
+         | <escopo> | <in_out> | <chamar_function> #33 PONTO_E_VIRGULA | <return>;
 
 <lista_ids>::= <lista_ids> VIRGULA ID #2 | ID #2;
 
@@ -257,10 +260,13 @@ CHAR_VALUE: '( {LETTER} | {NUMBER} | {UNDERSCORE} | {OTHERS} | {CHARACTER} ) '
 	
 <condicao_for>::= <declarar_var> <exp> #51 #52 #19 #18 PONTO_E_VIRGULA <atribuicao_variavel> | <atribuicao_variavel> PONTO_E_VIRGULA <exp> #51 #52 #19 #18 PONTO_E_VIRGULA <atribuicao_variavel>;
 
-<declarar_desvio>::= <if> | <if_else> ;
-//<if>::= IF ABRIR_PARENTESES <exp> #51 #19 #18 FECHAR_PARENTESES <escopo>;
-<if>::= IF ABRIR_PARENTESES <exp> #51 #19 #18 FECHAR_PARENTESES ABRIR_CHAVES #10 #55 <lista_cmd> FECHAR_CHAVES #11;
-<if_else>::= <if> ELSE #57 ABRIR_CHAVES #10 #55 <lista_cmd> FECHAR_CHAVES #11 #56 | <if> ELSE #57 <declarar_desvio> #56;
+//<declarar_desvio>::= <if> | <if_else> ;
+//<if>::= IF ABRIR_PARENTESES <exp> #51 #18 FECHAR_PARENTESES ABRIR_CHAVES #10 #55 <lista_cmd> FECHAR_CHAVES #11 #56;
+//<if_else>::= <if_exclusivo> ELSE #57 ABRIR_CHAVES #10 #55 <lista_cmd> FECHAR_CHAVES #11 #56 | <if_exclusivo> ELSE #57 <declarar_desvio>;
+
+<if_lista> ::= <if> #56 | <if> ELSE <if_lista> | <if> <else>;
+<if> ::= IF ABRIR_PARENTESES <exp> #51 #18 FECHAR_PARENTESES ABRIR_CHAVES #10 #55 <lista_cmd> FECHAR_CHAVES;
+<else> ::= ELSE #57 ABRIR_CHAVES <lista_cmd> FECHAR_CHAVES #56;
 
 <saidas> ::= STRING_VALUE #14 | ID #21 | CHAR #14 | <vetor_io> #15;
 
