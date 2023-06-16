@@ -13,6 +13,7 @@ class Simbolo{
 public:
     string tipo;
     string id;
+
     int escopo;
 
     bool inicializado = false;
@@ -21,7 +22,6 @@ public:
     bool parametro = false;
     bool funcao = false;
     bool vetor = false;
-
     int posVetor = 0;
 
     void DeclararTipo(std::string t);

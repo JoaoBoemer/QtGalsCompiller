@@ -37,6 +37,10 @@ string rotIf;
 string rotFim;
 int contIf;
 
+int contpar = 0;
+string nome_call;
+string nome;
+string func;
 string store;
 string vector_load;
 string lastTemp;
@@ -52,6 +56,11 @@ string newRotulo()
     contIf ++;
     string rot = "ROT" + to_string(contIf);
     return rot;
+}
+
+string getParname(string nome_call, int contpar)
+{
+    return "";
 }
 
 void ResetaTabela()
@@ -115,12 +124,18 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
             break;
 
         case 2:
-            ptrSim = Tabela.Find(stackEscopo, token->getLexeme());
+            if(func != "")
+                ptrSim = Tabela.Find(stackEscopo, func + "_" + token->getLexeme());
+            else
+                ptrSim = Tabela.Find(stackEscopo, token->getLexeme());
 
             if(ptrSim == nullptr)
             {
                 simbolo.funcao = false;
-                simbolo.id = token->getLexeme();
+                if(func != "")
+                    simbolo.id = func + "_" + token->getLexeme();
+                else
+                    simbolo.id = token->getLexeme();
                 simbolo.escopo = stackEscopo.top();
 
                 if(simbolo.parametro)
@@ -252,6 +267,7 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
             simbolo.vetor = false;
             simbolo.id = token->getLexeme();
             simbolo.escopo = stackEscopo.top();
+            func = token->getLexeme();
             Tabela.lstSimbolos.push_front(simbolo);
             simbolo.parametro = true;
             break;
@@ -406,7 +422,7 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
                 Simbolo sim = *it;
                 if(sim.vetor)
                 {
-                    Tabela.data.append(sim.id);
+                    Tabela.data.append( sim.id );
                     Tabela.data.append(":");
                     for(int i = 0; i < sim.posVetor; i++)
                     {
@@ -418,12 +434,13 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
                 }
                 else
                 {
-                    Tabela.data.append(sim.id);
+                    Tabela.data.append( sim.id );
                     Tabela.data.append(": 0\n");
                 }
             }
 
             Tabela.data.append("\n.text\n");
+            Tabela.data.append("JMP main\n" );
             Tabela.data.append(Tabela.assembly);
             break;
 
@@ -908,7 +925,39 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
         {
             Tabela.gera_cod("BGT", rotFim);
         }
-
         break;
+
+    case 63: // - Gera o rótulo de início da rotina
+
+        nome = token->getLexeme();
+        Tabela.gera_cod("ROT_"+nome, "");
+        break;
+
+    case 64: // - Gera retorno ao ponto de chamada da rotina
+        Tabela.gera_cod("RETURN", "0");
+        break;
+
+    case 65: // – Armazena o nome da rotina a ser chamada e inicializa o
+        //contador de parâmetros
+        nome_call = token->getLexeme();
+        contpar=0;
+        break;
+
+    case 66: // – Copia os valores passados por parâmetros para as
+        //variáveis (parâmetros) da rotina destino
+        Tabela.gera_cod("LD", token->getLexeme() ); // ver se é valor ou id
+        Tabela.gera_cod("STO", getParname(nome_call, contpar) );
+        contpar++;
+        break;
+
+    case 67: // Faz a chamada da rotina
+        Tabela.gera_cod("CALL", "_"+nome_call);
+        break;
+
+    case 68:
+        func = "";
+        Tabela.gera_cod("main: ", "");
+        break;
+
         }
 }
