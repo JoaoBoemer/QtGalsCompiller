@@ -874,6 +874,41 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
         Tabela.gera_cod(rotIf + ":", "");
         break;
 
+    case 61:
+        rotIf = newRotulo();
+        stackRot.push(rotIf);
+        Tabela.gera_cod(rotIf + ":", "");
+        break;
 
+    case 62:
+
+        rotFim = stackRot.top();
+        stackRot.pop();
+        if(operl == ">")
+        {
+            Tabela.gera_cod("BLE", rotFim);
+        }
+        if(operl == "<")
+        {
+            Tabela.gera_cod("BGE", rotFim);
+        }
+        if(operl == "==")
+        {
+            Tabela.gera_cod("BNE", rotFim);
+        }
+        if(operl == "!=")
+        {
+            Tabela.gera_cod("BEQ", rotFim);
+        }
+        if(operl == ">=")
+        {
+            Tabela.gera_cod("BLT", rotFim);
+        }
+        if(operl == "<=")
+        {
+            Tabela.gera_cod("BGT", rotFim);
+        }
+
+        break;
         }
 }
