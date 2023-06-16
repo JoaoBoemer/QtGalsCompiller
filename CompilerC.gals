@@ -139,6 +139,7 @@ CHAR_VALUE: '( {LETTER} | {NUMBER} | {UNDERSCORE} | {OTHERS} | {CHARACTER} ) '
 <termo>
 <lista_termo>
 <operador_aritmetico>
+<inicio_id>
 <lista_ids>
 <declarar_vetor_multi>
 <escopo>
@@ -194,13 +195,14 @@ CHAR_VALUE: '( {LETTER} | {NUMBER} | {UNDERSCORE} | {OTHERS} | {CHARACTER} ) '
 <vetor_entrada>
 <vector_atribuir>
 #Grammar
-<prog> ::= INT MAIN ABRIR_PARENTESES FECHAR_PARENTESES ABRIR_CHAVES #10 <lista_cmd> #20 FECHAR_CHAVES | <declarar_function> <escopo><prog> | <declarar_var><prog>;
+<prog> ::= INT MAIN ABRIR_PARENTESES FECHAR_PARENTESES ABRIR_CHAVES #10 #68 <lista_cmd> #20 FECHAR_CHAVES | <declarar_function> <escopo> #64 <prog> | <declarar_function> #64 PONTO_E_VIRGULA <prog> | <declarar_var><prog>;
 
 <lista_cmd> ::= <lista_cmd> <cmd> | <cmd>; //<return>;
 
 <cmd>::= <declarar_var> |<atribuicao_variavel> PONTO_E_VIRGULA |<declarar_function> <escopo> | <lacos_repeticao> | <if_lista>//<declarar_desvio>
-         | <escopo> | <in_out> | <chamar_function> #33 PONTO_E_VIRGULA | <return>;
+         | <escopo> | <in_out> | <chamar_function> #33 | <return>;
 
+//<inicio_id> ::= ID #2 #65 | ID #2 #65 VIRGULA <lista_ids> #67;
 <lista_ids>::= <lista_ids> VIRGULA ID #2 | ID #2;
 
 <atribuir_multi> ::= VIRGULA <lista_ids> ATRIBUICAO <exp> #51 #52 #6 | VIRGULA <lista_ids> ATRIBUICAO <exp> #51 #52 #6 <atribuir_multi> | VIRGULA <lista_ids>;
@@ -274,11 +276,11 @@ CHAR_VALUE: '( {LETTER} | {NUMBER} | {UNDERSCORE} | {OTHERS} | {CHARACTER} ) '
 <printf>::= PRINTF ABRIR_PARENTESES <lista_termo> FECHAR_PARENTESES PONTO_E_VIRGULA;
 <scanf>::= SCANF ABRIR_PARENTESES<lista_termo> FECHAR_PARENTESES PONTO_E_VIRGULA;
 
-<declarar_function>::= <tipo> ID #7 ABRIR_PARENTESES FECHAR_PARENTESES #8 | VOID #1 ID #7 ABRIR_PARENTESES FECHAR_PARENTESES #8;
-<declarar_function>::= <tipo> ID #7 ABRIR_PARENTESES <lista_parametros> FECHAR_PARENTESES #8 | VOID #1 ID #7 ABRIR_PARENTESES <lista_parametros> FECHAR_PARENTESES #8;
+<declarar_function>::= <tipo> ID #7 #63 ABRIR_PARENTESES FECHAR_PARENTESES #8 | VOID #1 ID #7 ABRIR_PARENTESES FECHAR_PARENTESES #8;
+<declarar_function>::= <tipo> ID #7 #63 ABRIR_PARENTESES <lista_parametros> FECHAR_PARENTESES #8 | VOID #1 ID #7 ABRIR_PARENTESES <lista_parametros> FECHAR_PARENTESES #8;
 
 <lista_parametros> ::= <parametro> | <parametro> VIRGULA <lista_parametros>;
 <parametro> ::= <tipo> ID #2 | <tipo> <vetor_parametro> | <ponteiro>;
 
 <return>::= RETURN <exp> PONTO_E_VIRGULA | RETURN PONTO_E_VIRGULA;
-<chamar_function>::= ID #13 ABRIR_PARENTESES FECHAR_PARENTESES | ID #13 ABRIR_PARENTESES <lista_termo> FECHAR_PARENTESES;
+<chamar_function>::= ID #13 #65 ABRIR_PARENTESES FECHAR_PARENTESES PONTO_E_VIRGULA | ID #13 #65 ABRIR_PARENTESES <lista_termo> FECHAR_PARENTESES PONTO_E_VIRGULA;
