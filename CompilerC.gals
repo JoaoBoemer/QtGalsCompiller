@@ -279,7 +279,7 @@ CHAR_VALUE: '( {LETTER} | {NUMBER} | {UNDERSCORE} | {OTHERS} | {CHARACTER} ) '
 <declarar_function>::= <tipo> ID #7 #63 ABRIR_PARENTESES FECHAR_PARENTESES #8 | VOID #1 ID #7 ABRIR_PARENTESES FECHAR_PARENTESES #8;
 <declarar_function>::= <tipo> ID #7 #63 ABRIR_PARENTESES <lista_parametros> FECHAR_PARENTESES #8 | VOID #1 ID #7 ABRIR_PARENTESES <lista_parametros> FECHAR_PARENTESES #8;
 
-<lista_parametros> ::= <parametro> | <parametro> VIRGULA <lista_parametros>;
+<lista_parametros> ::= #69 <parametro> | #69 <parametro> VIRGULA <lista_parametros>;
 <parametro> ::= <tipo> ID #2 | <tipo> <vetor_parametro> | <ponteiro>;
 
 <return>::= RETURN <exp> PONTO_E_VIRGULA | RETURN PONTO_E_VIRGULA;
