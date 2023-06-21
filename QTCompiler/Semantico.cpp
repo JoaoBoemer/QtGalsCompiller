@@ -15,6 +15,7 @@ int escopo = 0;
 Simbolo * ptrSim;
 Simbolo * lastSimbol;
 Simbolo * ptrAtribuir;
+Simbolo * ptrFunc;
 int return_type = -1;
 
 list<Simbolo*> lstExp;
@@ -37,6 +38,7 @@ string rotIf;
 string rotFim;
 int contIf;
 
+int contparFunc = 0;
 int contpar = 0;
 string nome_call;
 string nome;
@@ -142,6 +144,8 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
                 {
                     simbolo.escopo = stackEscopo.top() + 1;
                 }
+
+                simbolo.posParam = contparFunc;
 
                 Tabela.lstSimbolos.push_front(simbolo);
 
@@ -269,11 +273,15 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
             simbolo.escopo = stackEscopo.top();
             func = token->getLexeme();
             Tabela.lstSimbolos.push_front(simbolo);
+            ptrFunc = &Tabela.lstSimbolos.front();
+
             simbolo.parametro = true;
             break;
 
         case 8:
             simbolo.parametro = false;
+            ptrFunc->posParam = contparFunc;
+            contparFunc = 0;
             break;
 
         case 9:
@@ -957,6 +965,10 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
     case 68:
         func = "";
         Tabela.gera_cod("main: ", "");
+        break;
+
+    case 69:
+        contparFunc += 1;
         break;
 
         }

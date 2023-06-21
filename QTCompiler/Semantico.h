@@ -20,7 +20,10 @@ public:
     bool usado = false;
 
     bool parametro = false;
+
     bool funcao = false;
+    int posParam = 0;
+
     bool vetor = false;
     int posVetor = 0;
 
