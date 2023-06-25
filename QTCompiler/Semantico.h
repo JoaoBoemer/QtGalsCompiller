@@ -150,6 +150,7 @@ class Semantico
 {
 public:
     void executeAction(int action, const Token *token) throw (SemanticError );
+    std::string getParname(string nome_call, int contpar);
     TabelaSimbolo Tabela;
 };
 

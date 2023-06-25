@@ -38,7 +38,8 @@ frmTabela::frmTabela(list<Simbolo> tabSim, QWidget * parent) :
         Mensagem.append(to_string(sim.vetor));
         Mensagem.append("\nPosicoesVetor? ");
         Mensagem.append(to_string(sim.posVetor));
-
+        Mensagem.append("\nPosicaoParam ");
+        Mensagem.append(to_string(sim.posParam));
         Mensagem.append("\n----------------------------\n");
     }
     //ui->textEdit->append("ID | TIPO | ESCOPO | FUNCAO | PARAMETRO | VETOR");

@@ -7,6 +7,8 @@
 
 using namespace std;
 
+string teste;
+
 SemanticTable semanticTable;
 Simbolo simbolo;
 stack<int> stackEscopo;
@@ -60,10 +62,18 @@ string newRotulo()
     return rot;
 }
 
+/*
 string getParname(string nome_call, int contpar)
 {
+    for ( auto ptr : Tabela.lstSimbolos ) {
+        if ( ptr.id.substring( 0, nome_call.size() ) == nome_call && ptr.posParam == contpar )
+            return ptr.id;
+    }
+
+    //Tabela.setWar
     return "";
 }
+*/
 
 void ResetaTabela()
 {
@@ -218,7 +228,6 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
                 ResetaTabela();
                 throw SemanticError("Tentativa de utilizar variavel nao existente.", token->getPosition());
             }
-
             break;
 
         case 6:
@@ -953,8 +962,13 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
 
     case 66: // – Copia os valores passados por parâmetros para as
         //variáveis (parâmetros) da rotina destino
+        for ( auto ptr : Tabela.lstSimbolos ) {
+            if ( ptr.id.substring( 0, nome_call.size() ) == nome_call && ptr.posParam == contpar )
+                teste = ptr.id;
+        }
+
         Tabela.gera_cod("LD", token->getLexeme() ); // ver se é valor ou id
-        Tabela.gera_cod("STO", getParname(nome_call, contpar) );
+        Tabela.gera_cod("STO", teste );
         contpar++;
         break;
 
