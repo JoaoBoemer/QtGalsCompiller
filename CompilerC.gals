@@ -200,7 +200,7 @@ CHAR_VALUE: '( {LETTER} | {NUMBER} | {UNDERSCORE} | {OTHERS} | {CHARACTER} ) '
 <lista_cmd> ::= <lista_cmd> <cmd> | <cmd>; //<return>;
 
 <cmd>::= <declarar_var> |<atribuicao_variavel> PONTO_E_VIRGULA |<declarar_function> <escopo> | <lacos_repeticao> | <if_lista>//<declarar_desvio>
-         | <escopo> | <in_out> | <chamar_function> #33 | <return>;
+         | <escopo> | <in_out> | <chamar_function> | <return>;
 
 //<inicio_id> ::= ID #2 #65 | ID #2 #65 VIRGULA <lista_ids> #67;
 <lista_ids>::= <lista_ids> VIRGULA ID #2 | ID #2;
@@ -239,7 +239,7 @@ CHAR_VALUE: '( {LETTER} | {NUMBER} | {UNDERSCORE} | {OTHERS} | {CHARACTER} ) '
 
 <termo> ::= ID #3 | INT_VALUE #31 | FLOAT_VALUE #32 | DOUBLE_VALUE #33 | CHAR_VALUE#34 | STRING_VALUE#35 | BOOLEAN_VALUE #36 | <vetor_exp>;// | <chamar_function>;
 
-<lista_termo>::= <termo> | <lista_termo> VIRGULA <termo>;
+<lista_termo>::= <termo> #66 | <lista_termo> VIRGULA <termo> #66;
 
 <op_rel> ::= MAIOR | MENOR | MENOR_IGUAL | MAIOR_IGUAL | IGUAL | DIFERENTE; 
 <op_neg> ::= BITWISE_NOT | INVERTER;
