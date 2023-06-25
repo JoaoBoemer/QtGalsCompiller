@@ -194,6 +194,7 @@ CHAR_VALUE: '( {LETTER} | {NUMBER} | {UNDERSCORE} | {OTHERS} | {CHARACTER} ) '
 <vetor_exp>
 <vetor_entrada>
 <vector_atribuir>
+<termo_parametro>
 #Grammar
 <prog> ::= INT MAIN ABRIR_PARENTESES FECHAR_PARENTESES ABRIR_CHAVES #10 #68 <lista_cmd> #20 FECHAR_CHAVES | <declarar_function> <escopo> #64 <prog> | <declarar_function> #64 PONTO_E_VIRGULA <prog> | <declarar_var><prog>;
 
@@ -239,7 +240,8 @@ CHAR_VALUE: '( {LETTER} | {NUMBER} | {UNDERSCORE} | {OTHERS} | {CHARACTER} ) '
 
 <termo> ::= ID #3 | INT_VALUE #31 | FLOAT_VALUE #32 | DOUBLE_VALUE #33 | CHAR_VALUE#34 | STRING_VALUE#35 | BOOLEAN_VALUE #36 | <vetor_exp>;// | <chamar_function>;
 
-<lista_termo>::= <termo> #66 | <lista_termo> VIRGULA <termo> #66;
+<termo_parametro> ::= ID | INT_VALUE | FLOAT_VALUE | DOUBLE_VALUE | CHAR_VALUE | STRING_VALUE | BOOLEAN_VALUE | <vetor_exp>;
+<lista_termo>::= <termo_parametro> #66 | <lista_termo> VIRGULA <termo_parametro> #66;
 
 <op_rel> ::= MAIOR | MENOR | MENOR_IGUAL | MAIOR_IGUAL | IGUAL | DIFERENTE; 
 <op_neg> ::= BITWISE_NOT | INVERTER;
@@ -283,4 +285,4 @@ CHAR_VALUE: '( {LETTER} | {NUMBER} | {UNDERSCORE} | {OTHERS} | {CHARACTER} ) '
 <parametro> ::= <tipo> ID #2 | <tipo> <vetor_parametro> | <ponteiro>;
 
 <return>::= RETURN <exp> PONTO_E_VIRGULA | RETURN PONTO_E_VIRGULA;
-<chamar_function>::= ID #13 #65 ABRIR_PARENTESES FECHAR_PARENTESES PONTO_E_VIRGULA | ID #13 #65 ABRIR_PARENTESES <lista_termo> FECHAR_PARENTESES PONTO_E_VIRGULA;
+<chamar_function>::= ID #13 #65 ABRIR_PARENTESES FECHAR_PARENTESES PONTO_E_VIRGULA #67 | ID #13 #65 ABRIR_PARENTESES <lista_termo> FECHAR_PARENTESES PONTO_E_VIRGULA #67;
