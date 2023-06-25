@@ -7,7 +7,7 @@
 
 using namespace std;
 
-string teste;
+string busca_nome_funcao;
 
 SemanticTable semanticTable;
 Simbolo simbolo;
@@ -51,6 +51,9 @@ string lastTemp;
 Temp * temporario;
 Temp * temporarioVetor = nullptr;
 Temp * temporarioAux;
+
+string func_aux;
+
 void Simbolo::DeclararTipo(std::string t){
     tipo = t;
 }
@@ -61,7 +64,6 @@ string newRotulo()
     string rot = "ROT" + to_string(contIf);
     return rot;
 }
-
 /*
 string getParname(string nome_call, int contpar)
 {
@@ -74,7 +76,6 @@ string getParname(string nome_call, int contpar)
     return "";
 }
 */
-
 void ResetaTabela()
 {
     while(!stackEscopo.empty())
@@ -87,6 +88,7 @@ void ResetaTabela()
     }
     contIf = 0;
     escopo = 0;
+    contpar = 0;
     simbolo.vetor = false;
     simbolo.parametro = false;
     lstExp.clear();
@@ -329,6 +331,7 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
                     if(sim.escopo == temp.top() && sim.id == lexema && sim.funcao == true)
                     {
                         sim.usado = true;
+                        ptrFunc = Tabela.Find(temp, sim.id);
                         return;
                     }
                 }
@@ -957,22 +960,49 @@ void Semantico::executeAction(int action, const Token *token) throw (SemanticErr
     case 65: // – Armazena o nome da rotina a ser chamada e inicializa o
         //contador de parâmetros
         nome_call = token->getLexeme();
-        contpar=0;
+        contpar=1;
         break;
 
     case 66: // – Copia os valores passados por parâmetros para as
-        //variáveis (parâmetros) da rotina destino
         for ( auto ptr : Tabela.lstSimbolos ) {
-            if ( ptr.id.substring( 0, nome_call.size() ) == nome_call && ptr.posParam == contpar )
-                teste = ptr.id;
+            func_aux = ptr.id;
+            func_aux = func_aux.substr(0, nome_call.size());
+            cout << ptr.id;
+            if ( func_aux == nome_call && contpar == ptr.posParam && ptr.funcao == 0)
+            {
+                busca_nome_funcao = ptr.id;
+            }
         }
 
-        Tabela.gera_cod("LD", token->getLexeme() ); // ver se é valor ou id
-        Tabela.gera_cod("STO", teste );
+        ptrSim = Tabela.Find( stackEscopo, token->getLexeme() );
+
+        if(busca_nome_funcao != "")
+        {
+            if( ptrSim == nullptr )
+            {
+                Tabela.gera_cod("LDI", token->getLexeme() ); // ver se é valor ou id
+            }
+            else
+            {
+                Tabela.gera_cod("LD", token->getLexeme() ); // ver se é valor ou id
+            }
+            Tabela.gera_cod("STO", busca_nome_funcao );
+        }
+
+        func_aux == "";
+        busca_nome_funcao = "";
         contpar++;
         break;
 
     case 67: // Faz a chamada da rotina
+        if(contpar-1 < ptrFunc->posParam)
+        {
+            throw SemanticError( "Faltou parametros na funcao " + ptrFunc->id, token->getPosition() );
+        }
+        if( contpar-1 > ptrFunc->posParam )
+        {
+            Tabela.setWarning(*ptrFunc, "Muitos parametros na funcao");
+        }
         Tabela.gera_cod("CALL", "_"+nome_call);
         break;
 
